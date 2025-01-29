@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const profileRoutes = require('./routes/profileRoutes.js');
 const bodyParser = require('body-parser');
 const path = require('path'); 
 
@@ -20,6 +21,7 @@ app.get('/login.html', (req, res) => {
 
 // Routes
 app.use('/', userRoutes);
+app.use('/profile', profileRoutes);
 
 // Start server
 app.listen(PORT, () => {

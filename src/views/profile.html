@@ -59,55 +59,89 @@ button:hover {
 
   </style>
 
-  <form id="resume-form">
-    <h1 >Profile details </h1>
+<form id="resume-form">
+    <h1>Profile Details</h1>
     <label for="name"><h3>Full Name:</h3></label>
-    <input type="text" id="name" name="name" placeholder="Enter your name" required>
+    <input type="text" id="name" name="profileName" placeholder="Enter your name" required>
+    
     <h3>Select your Gender</h3>
     <div class="gender-container">
-        <label><input type="radio" name="gender" value="male"> Male</label>
-        <label><input type="radio" name="gender" value="female"> Female</label>
-        <label><input type="radio" name="gender" value="other"> Other</label>
+        <label><input type="radio" name="gender" value="Male" required> Male</label>
+        <label><input type="radio" name="gender" value="Female" required> Female</label>
+        <label><input type="radio" name="gender" value="Other" required> Other</label>
     </div><br>
+    
     <h3>User Type </h3>
-    <label><input type="radio" name="User" value="rmw">Roommate seeker with room </label>
-    <label><input type="radio" name="User" value="rmwt">Roommate seeker without room </label>
+    <label><input type="radio" name="userType" value="roommateSeekerWithRoom" required> Roommate seeker with room</label>
+    <label><input type="radio" name="userType" value="roommateSeekerWithoutRoom" required> Roommate seeker without room</label>
   
-
-    <label for="age"><h3>Age :</h3></label>
-    <input type="number" id="age"name="age" placeholder="Enter your age" required>
+    <label for="age"><h3>Age:</h3></label>
+    <input type="number" id="age" name="age" placeholder="Enter your age" required>
 
     <h3>Choose a language you are comfortable with:</h3>
-<label><input type="radio" name="lang" value="hindi" onclick="toggleOtherLanguage(false)"> Hindi</label>
-<label><input type="radio" name="lang" value="english" onclick="toggleOtherLanguage(false)"> English</label>
-<label><input type="radio" name="lang" value="other" onclick="toggleOtherLanguage(true)"> Other</label>
+    <label><input type="checkbox" name="languages" value="Hindi" onclick="toggleOtherLanguage(false)"> Hindi</label>
+    <label><input type="checkbox" name="languages" value="English" onclick="toggleOtherLanguage(false)"> English</label>
+    <label><input type="checkbox" name="languages" value="Other" onclick="toggleOtherLanguage(true)"> Other</label>
 
-<div id="other-language-container" style="display: none; margin-top: 10px;">
-    <label for="other-language">Please specify:</label>
-    <textarea id="other-language" name="other_language" rows="3" cols="30" placeholder="Enter your preferred language"></textarea>
-</div>
-
-
+    <div id="other-language-container" style="display: none; margin-top: 10px;">
+        <label for="other-language">Please specify:</label>
+        <textarea id="other-language" name="otherLanguage" rows="3" cols="30" placeholder="Enter your preferred language"></textarea>
+    </div>
 
     <label for="address"><h3>Address:</h3></label>
     <input type="text" id="address" name="address" placeholder="Enter your address" required>
 
-    <label for="Description"><h3>Description:</h3></label>
-    <textarea id="Description" name="Description" placeholder="Enter a short description" rows="4" required></textarea>
+    <label for="description"><h3>Description:</h3></label>
+    <textarea id="description" name="description" placeholder="Enter a short description" rows="4" required></textarea>
 
-
-    
     <button type="submit">Submit</button>
   </form>
 
-  <script > 
+  <script> 
   function toggleOtherLanguage(show) {
     const otherLanguageContainer = document.getElementById('other-language-container');
-    if (show) {
-        otherLanguageContainer.style.display = 'block';
-    } else {
-        otherLanguageContainer.style.display = 'none';
+    otherLanguageContainer.style.display = show ? 'block' : 'none';
+  }
+
+  document.getElementById('resume-form').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => {
+      if (data[key]) {
+        // Handle multiple checkboxes for languages
+        if (Array.isArray(data[key])) {
+          data[key].push(value);
+        } else {
+          data[key] = [data[key], value];
+        }
+      } else {
+        data[key] = value;
+      }
+    });
+
+    try {
+      const response = await fetch('http://localhost:3000/profile/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        alert('Profile created successfully!');
+        window.location.href = '/room.html'; // Redirect to room.html
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
     }
-}</script>
+  });
+  </script>
 </body>
 </html>
