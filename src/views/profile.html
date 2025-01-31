@@ -132,7 +132,7 @@ button:hover {
 
       if (response.ok) {
         alert('Profile created successfully!');
-        window.location.href = '/room.html'; // Redirect to room.html
+        window.location.href = '/room'; // Redirect to room.html
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
