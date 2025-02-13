@@ -10,26 +10,15 @@
 <body>
     <div class="card">
         <h1><U>Roommate Preferences</U></h1>
-        <form>
+        <form id="questionaire-form" action="/questionaire/submit-form" method="POST">
             <!-- Gender Preference -->
 
             
-            <div class="question">
-                <label><h2> Select your gender?</h2></label>
-                <label><input type="radio"  name="genderr"> Male</label>
-                <label><input type="radio" name="genderr"> Female</label>
-                <label><input type="radio" name="genderr"> prefer not to say  </label>
-            </div>
-
-            <div class="question">
-                <label><h2> Enter  your Age?</h2></label>
-               
-    <input type="number" id="age"name="age" placeholder="Enter your age" required>
-            </div>
+        
 
 
             <div class="question">
-                <label><h2>Preference for your roommate's gender:</h2></label>
+                <label><h2>Prefered gender for your roommate:</h2></label>
                 <label><input type="radio" name="gender-preference" value="male" required> Male</label>
                 <label><input type="radio" name="gender-preference" value="female"> Female</label>
                 <label><input type="radio" name="gender-preference" value="no-preference"> No Preference</label>
@@ -50,8 +39,8 @@
             
             <div class="question">
                 <label><h2>Your preferred Sleeping Schedule:</h2></label>
-                <label><input type="radio" name="sleeping-schedule" value="early-bird" required> Early Bird</label>
-                <label><input type="radio" name="sleeping-schedule" value="night-owl"> Night Owl</label>
+                <label><input type="radio" name="sleeping-schedule" value="morning-person" required> Morning Person</label>
+                <label><input type="radio" name="sleeping-schedule" value="night-person"> Night Person</label>
                 <label><input type="radio" name="sleeping-schedule" value="no-preference"> No Preference</label>
             </div>
 
@@ -199,7 +188,55 @@
         </form>
     </div>
     <script>
-       
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM fully loaded"); // Debugging log
+
+    const form = document.getElementById('questionnaire-form');
+    
+    if (!form) {
+        console.error("Form not found! Check if 'id=\"questionnaire-form\"' exists in your HTML.");
+        return;
+    }
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent default form submission
+        console.log("Form submission event triggered"); // Debugging log
+
+        // Collect form data
+        const formData = new FormData(this);
+        const data = {};
+
+        formData.forEach((value, key) => {
+            if (data[key]) {
+                if (!Array.isArray(data[key])) {
+                    data[key] = [data[key]];
+                }
+                data[key].push(value);
+            } else {
+                data[key] = value;
+            }
+        });
+
+        console.log("Submitting form data:", data); // Debugging log
+
+        // Send data to backend via POST request
+        try {
+            const response = await fetch('http://localhost:3000/questionaire/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            console.log("Server response:", result); // Debugging log
+            alert(result.message);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Error submitting form. Please try again.');
+        }
+    });
+});
+
         const radios = document.querySelectorAll('input[name="location_preference"]');
         const addressDiv = document.getElementById('address-details');
     
