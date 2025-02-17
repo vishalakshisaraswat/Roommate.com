@@ -132,8 +132,13 @@ button:hover {
 
       if (response.ok) {
         alert('Profile created successfully!');
-        window.location.href = '/room'; // Redirect to room.html
-      } else {
+        if (data.userType === 'roommateSeekerWithRoom') {
+          window.location.href = '/room';
+        } else if (data.userType === 'roommateSeekerWithoutRoom') {
+          window.location.href = '/quessionaire';
+        }
+      } // Redirect to room.html
+       else {
         const errorData = await response.json();
         alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
       }

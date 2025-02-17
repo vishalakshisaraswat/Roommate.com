@@ -33,6 +33,10 @@ app.get('/room', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'room.html'));
 });
 
+app.get('/quessionaire', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'quessionaire.html'));
+});
+
 // Route to fetch merged Profile + Questionaire responses
 app.get('/responses', async (req, res) => {
   try {
