@@ -61,7 +61,7 @@
   <h1>Profile Details</h1>
   <div class="profile-details-container">
     <div class="profile-header">
-      <img id="profile-image" src="" alt="Profile Image"> <!-- Image will be dynamically updated -->
+      <img id="profile-image" src="" alt="Profile Image">
       <div class="profile-info">
         <h2 id="profile-name"></h2>
         <p id="profile-age"></p>
@@ -78,15 +78,14 @@
     // Retrieve profile data from sessionStorage
     const profileData = JSON.parse(sessionStorage.getItem('profileData'));
 
-    // Populate the profile details
-    document.getElementById('profile-name').textContent = profileData.name;
-    document.getElementById('profile-age').textContent = `Age: ${profileData.age}`;
-    document.getElementById('profile-profession').textContent = profileData.profession;
-    document.getElementById('profile-preference').textContent = `Looking for: ${profileData.preference}`;
-    document.getElementById('profile-about').textContent = profileData.about;
-
-    // Dynamically update the profile image
-    document.getElementById('profile-image').src = profileData.image;
+    if (profileData) {
+      document.getElementById('profile-name').textContent = profileData.profileName || "N/A";
+      document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
+      document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
+      document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking || "N/A"}, ${profileData.alcohol || "N/A"}`;
+      document.getElementById('profile-about').textContent = profileData.description || "N/A";
+      document.getElementById('profile-image').src = profileData.image || "https://via.placeholder.com/250";
+    }
 
     // Initialize the map
     const map = L.map('map').setView([39.8283, -98.5795], 4);
@@ -120,8 +119,10 @@
         .catch(error => console.error("Geocoding error:", error));
     }
 
-    // Geocode the profile location and place a marker
-    geocodePlace(profileData.location);
+    // If location exists, geocode it
+    if (profileData.address) {
+      geocodePlace(profileData.address);
+    }
   </script>
 </body>
 </html>

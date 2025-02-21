@@ -55,34 +55,41 @@
     </div>
 
     <script>
-        async function fetchProfiles() {
-            try {
-                const response = await fetch('/responses'); // Fetch profiles data
-                const data = await response.json();
+async function fetchProfiles() {
+    try {
+        const response = await fetch('/profile/all'); // Fetch from updated endpoint
+        const data = await response.json();
 
-                // Populate Profiles
-                const container = document.getElementById('profiles-container');
-                container.innerHTML = '';
+        const container = document.getElementById('profiles-container');
+        container.innerHTML = '';
 
-                data.forEach(entry => {
-                    const card = `<div class="profile-card">
-                        <img src="${entry.imageURL || 'https://via.placeholder.com/250'}" alt="Profile Picture">
-                        <div class="profile-content">
-                            <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                            <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'} | ${entry.address || 'N/A'}</div>
-                            <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
-                            <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
-                        </div>
-                    </div>`;
-                    container.innerHTML += card;
-                });
+        data.forEach(entry => {
+            const imageSrc = entry.image 
+                ? `${entry.image}`  // Correct Base64 format
+                : 'https://via.placeholder.com/250'; 
+                const card = `
+                <div class="profile-card">
+                    <img src="${imageSrc}" alt="Profile Picture" onerror="this.onerror=null;this.src='https://via.placeholder.com/250';">
+                    <div class="profile-content">
+                        <div class="profile-name">${entry.profileName || 'N/A'}</div>
+                        <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'} | ${entry.address || 'N/A'}</div>
+                        <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
+                        <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
+                        
+                    </div>
+                </div>
+            `;
 
-            } catch (error) {
-                console.error('Error fetching profiles:', error);
-            }
-        }
+            container.insertAdjacentHTML('beforeend', card);
+        });
 
-        window.onload = fetchProfiles;
+    } catch (error) {
+        console.error('Error fetching profiles:', error);
+    }
+}
+
+window.onload = fetchProfiles;
+
     </script>
 </body>
 </html>
