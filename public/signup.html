@@ -14,7 +14,7 @@
     <h1>You're just one click away to find a perfect roommate!</h1>
     <p>Please Create a strong password of length more than 8 and less than 20.</p>
     <form method="post" action="http://localhost:3000/signup">
-      <input type="email" name="email" placeholder="Email address" required>
+      <input type="email" pattern = "[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" name="email" placeholder="Email address" required>
       <input type="password" name="password" placeholder="Create a Strong password" required>
       <button type="submit">Continue</button>
     </form>

@@ -59,7 +59,7 @@ button:hover {
 
   </style>
 
-<form id="resume-form">
+<form id="resume-form" enctype="multipart/form-data">
     <h1>Profile Details</h1>
     <label for="name"><h3>Full Name:</h3></label>
     <input type="text" id="name" name="profileName" placeholder="Enter your name" required>
@@ -94,54 +94,86 @@ button:hover {
     <label for="description"><h3>Description:</h3></label>
     <textarea id="description" name="description" placeholder="Enter a short description" rows="4" required></textarea>
 
+     <!-- New Image Upload Field -->
+     <label for="image"><h3>Upload Profile Picture:</h3></label>
+<input type="file" id="image" name="image" accept="image/*" required>
+<img id="preview" src="#" alt="Profile Image Preview" style="display:none; width: 100px; height: 100px;">
+
+
     <button type="submit">Submit</button>
   </form>
 
-  <script> 
-  function toggleOtherLanguage(show) {
-    const otherLanguageContainer = document.getElementById('other-language-container');
-    otherLanguageContainer.style.display = show ? 'block' : 'none';
-  }
-
-  document.getElementById('resume-form').addEventListener('submit', async function (event) {
-    event.preventDefault();
-
-    const formData = new FormData(this);
-    const data = {};
-    formData.forEach((value, key) => {
-      if (data[key]) {
-        // Handle multiple checkboxes for languages
-        if (Array.isArray(data[key])) {
-          data[key].push(value);
-        } else {
-          data[key] = [data[key], value];
-        }
-      } else {
-        data[key] = value;
+  <script>
+    document.getElementById('image').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('preview').src = e.target.result;
+          document.getElementById('preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
       }
     });
+  
+    document.getElementById('resume-form').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      
+      const formData = new FormData(this);
+      const imageFile = document.getElementById('image').files[0];
+  
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onloadend = async function() {
+          formData.set('image', reader.result.split(',')[1]); // Send only Base64 data, no prefix
 
-    try {
-      const response = await fetch('http://localhost:3000/profile/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
+          const data = {};
+          formData.forEach((value, key) => {
+            if (data[key]) {
+              if (Array.isArray(data[key])) {
+                data[key].push(value);
+              } else {
+                data[key] = [data[key], value];
+              }
+            } else {
+              data[key] = value;
+            }
+          });
+  
+          try {
+            const response = await fetch('http://localhost:3000/profile/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+  
+            if (response.ok) {
         alert('Profile created successfully!');
-        window.location.href = '/room'; // Redirect to room.html
-      } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
+        const responseData = await response.json();
+          console.log('Response:', responseData);
+
+        if (data.userType === 'roommateSeekerWithRoom') {
+          window.location.href = '/room';
+        } else if (data.userType === 'roommateSeekerWithoutRoom') {
+          window.location.href = '/quessionaire';
+        }
+            } else {
+              const errorData = await response.json();
+              alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+          }
+        };
+        reader.readAsDataURL(imageFile);
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred. Please try again.');
-    }
-  });
+      else {
+    alert('Please upload a profile picture.');
+  }
+    });
   </script>
+  
+  
 </body>
 </html>
