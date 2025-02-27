@@ -203,7 +203,55 @@
         </form>
     </div>
     <script>
-       
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM fully loaded"); // Debugging log
+
+    const form = document.getElementById('questionnaire-form');
+    
+    if (!form) {
+        console.error("Form not found! Check if 'id=\"questionnaire-form\"' exists in your HTML.");
+        return;
+    }
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent default form submission
+        console.log("Form submission event triggered"); // Debugging log
+
+        // Collect form data
+        const formData = new FormData(this);
+        const data = {};
+
+        formData.forEach((value, key) => {
+            if (data[key]) {
+                if (!Array.isArray(data[key])) {
+                    data[key] = [data[key]];
+                }
+                data[key].push(value);
+            } else {
+                data[key] = value;
+            }
+        });
+
+        console.log("Submitting form data:", data); // Debugging log
+
+        // Send data to backend via POST request
+        try {
+            const response = await fetch('http://localhost:3000/questionaire/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            console.log("Server response:", result); // Debugging log
+            alert(result.message);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Error submitting form. Please try again.');
+        }
+    });
+});
+
         const radios = document.querySelectorAll('input[name="location_preference"]');
         const addressDiv = document.getElementById('address-details');
     
