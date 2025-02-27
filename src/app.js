@@ -5,6 +5,7 @@ const profileRoutes = require('./routes/profileRoutes.js');
 const roomRoutes = require('./routes/roomRoutes.js');
 const bodyParser = require('body-parser');
 const path = require('path'); 
+const authMiddleware = require("./middleware/authMiddleware.js");
 
 const app = express();
 const PORT = 3000;
