@@ -3,12 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Aadhaar e-KYC</title>
 </head>
 <body>
-    <h1>Registration Successful!!</h1>
-    <a href="./login.html">
+    <h1>Aadhaar e-KYC</h1>
+    
+    <!-- Aadhaar Submission -->
+    <div>
+        <h2>Enter Aadhaar</h2>
+        <input type="text" id="aadhaarInput" placeholder="Enter Aadhaar">
+        <button onclick="sendAadhaar()">Send Aadhaar</button>
+        <p id="aadhaarResponse"></p>
+    </div>
+
+    <!-- OTP Verification -->
+    <div>
+        <h2>Enter OTP</h2>
+        <input type="text" id="otpInput" placeholder="Enter OTP">
+        <button onclick="verifyOtp(event)">Verify OTP</button>
+        <p id="otpResponse"></p>
+    </div>
+
+    <!-- Login Button (Hidden by default) -->
+    <a href="./login.html" id="loginButton" style="display: none;">
         <button>Login</button>
     </a>
+
+    <script>
+        async function sendAadhaar() {
+            const aadhaarInput = document.getElementById("aadhaarInput");
+            const aadhaar = aadhaarInput.value.trim();
+            const responseText = document.getElementById("aadhaarResponse");
+
+            if (!/^\d{12}$/.test(aadhaar)) {
+                responseText.innerHTML = "<span style='color: red;'>Invalid Aadhaar number. Must be 12 digits.</span>";
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/sendAadhaar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ aadhaar }),
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    responseText.innerHTML = "<span style='color: green;'>OTP Sent</span>";
+                    localStorage.setItem("aadhaar", aadhaar);
+                } else {
+                    responseText.innerHTML = `<span style='color: red;'>${data.message}</span>`;
+                }
+            } catch (error) {
+                responseText.innerHTML = "<span style='color: red;'>Error: " + error.message + "</span>";
+            }
+        }
+
+        async function verifyOtp(event) {
+            event.preventDefault();
+
+            const aadhaar = localStorage.getItem("aadhaar");
+            const otp = document.getElementById("otpInput").value.trim();
+            const responseText = document.getElementById("otpResponse");
+            const loginButton = document.getElementById("loginButton");
+
+            if (!aadhaar) {
+                responseText.innerHTML = "<span style='color: red;'>Please enter Aadhaar first.</span>";
+                return;
+            }
+
+            if (!/^\d{6}$/.test(otp)) {
+                responseText.innerHTML = "<span style='color: red;'>Invalid OTP. Must be 6 digits.</span>";
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:3000/verifyOtp", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ aadhaar, otp }),
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    responseText.innerHTML = "<span style='color: green;'>OTP Verified Successfully</span>";
+                    loginButton.style.display = "block"; 
+                } else {
+                    responseText.innerHTML = `<span style='color: red;'>${data.message}</span>`;
+                }
+            } catch (error) {
+                responseText.innerHTML = "<span style='color: red;'>Error: " + error.message + "</span>";
+            }
+        }
+    </script>
 </body>
 </html>
