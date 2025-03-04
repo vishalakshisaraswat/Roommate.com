@@ -78,7 +78,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 // **Serve HTML pages**
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'login.html')));
 app.get('/room', (req, res) => res.sendFile(path.join(__dirname, 'views', 'room.html')));
-app.get('/questionaire', (req, res) => res.sendFile(path.join(__dirname, 'views', 'questionaire.html')));
+app.get('/quessionaire', (req, res) => res.sendFile(path.join(__dirname, 'views', 'quessionaire.html')));
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
 
 // **Routes**
