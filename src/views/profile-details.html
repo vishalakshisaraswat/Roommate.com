@@ -1,11 +1,9 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile Details</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
- 
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,7 +51,6 @@
       max-width: 600px;
       margin: 20px 0;
       border-radius: 8px;
-      overflow: hidden;
     }
   </style>
 </head>
@@ -61,67 +58,424 @@
   <h1>Profile Details</h1>
   <div class="profile-details-container">
     <div class="profile-header">
-      <img id="profile-image" src="" alt="Profile Image"> <!-- Image will be dynamically updated -->
+      <img id="profile-image" src="" alt="Profile Image">
       <div class="profile-info">
         <h2 id="profile-name"></h2>
         <p id="profile-age"></p>
         <p id="profile-profession"></p>
         <p id="profile-preference"></p>
         <p id="profile-about"></p>
+        <p id="profile-location"></p>
       </div>
     </div>
   </div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Retrieve profile data from sessionStorage
-    const profileData = JSON.parse(sessionStorage.getItem('profileData'));
+    function initMap() {
+      const profileData = JSON.parse(sessionStorage.getItem('profileData'));
 
-    // Populate the profile details
-    document.getElementById('profile-name').textContent = profileData.name;
-    document.getElementById('profile-age').textContent = `Age: ${profileData.age}`;
-    document.getElementById('profile-profession').textContent = profileData.profession;
-    document.getElementById('profile-preference').textContent = `Looking for: ${profileData.preference}`;
-    document.getElementById('profile-about').textContent = profileData.about;
+      if (profileData) {
+        document.getElementById('profile-name').textContent = profileData.profileName;
+        document.getElementById('profile-age').textContent = `Age: ${profileData.age}`;
+        document.getElementById('profile-profession').textContent = profileData.userType;
+        document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking}, ${profileData.alcohol}`;
+        document.getElementById('profile-about').textContent = profileData.description;
+        document.getElementById('profile-location').textContent = `Location: ${profileData.address}`;
+        document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
 
-    // Dynamically update the profile image
-    document.getElementById('profile-image').src = profileData.image;
+        const geocoder = new google.maps.Geocoder();
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 10,
+            center: { lat: 39.8283, lng: -98.5795 },
+        });
 
-    // Initialize the map
-    const map = L.map('map').setView([39.8283, -98.5795], 4);
-
-    // Add OpenStreetMap tile layer to the map
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Function to geocode the place and move the map
-    function geocodePlace(place) {
-      var url = `https://nominatim.openstreetmap.org/search?format=json&q=${place}`;
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          if (data.length > 0) {
-            var lat = data[0].lat;
-            var lon = data[0].lon;
-            var placeName = data[0].display_name;
-
-            // Move the map and marker to the new location
-            map.setView([lat, lon], 10);
-
-            // Add marker to the map
-            var marker = L.marker([lat, lon]).addTo(map);
-            marker.bindPopup(`<b>${placeName}</b>`).openPopup();
+        geocoder.geocode({ address: profileData.address }, (results, status) => {
+          if (status === "OK" && results.length > 0) {
+              const location = results[0].geometry.location;
+              map.setCenter(location);
+              new google.maps.Marker({
+                  map,
+                  position: location,
+                  title: profileData.address,
+              });
           } else {
-            alert("Location not found.");
+              console.error("Geocode failed: " + status);
+              alert("Location not found. Please check the address.");
           }
-        })
-        .catch(error => console.error("Geocoding error:", error));
+      });
+      } else {
+        alert("No profile data found.");
+      }
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+</body>
+</html> -->
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .profile-details-container {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+    .profile-header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .profile-info {
+      flex-grow: 1;
+    }
+    .profile-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    #map {
+      height: 400px;
+      width: 90%;
+      max-width: 600px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profile Details</h1>
+  <div class="profile-details-container">
+    <div class="profile-header">
+      <img id="profile-image" src="" alt="Profile Image">
+      <div class="profile-info">
+        <h2 id="profile-name"></h2>
+        <p id="profile-age"></p>
+        <p id="profile-profession"></p>
+        <p id="profile-preference"></p>
+        <p id="profile-about"></p>
+        <p id="profile-location"></p>
+      </div>
+    </div>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    let map, geocoder;
+
+    function initMap() {
+      geocoder = new google.maps.Geocoder();
+      map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 10,
+          center: { lat: 39.8283, lng: -98.5795 }, // Default USA center
+      });
+
+      const profileData = JSON.parse(sessionStorage.getItem('profileData'));
+
+      if (!profileData) {
+        alert("No profile data found.");
+        return;
+      }
+
+      // Populate profile details
+      document.getElementById('profile-name').textContent = profileData.profileName || "Unknown";
+      document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
+      document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
+      document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking || "N/A"}, ${profileData.alcohol || "N/A"}`;
+      document.getElementById('profile-about').textContent = profileData.description || "No description available.";
+      document.getElementById('profile-location').textContent = `Location: ${profileData.address || "Location not available"}`;
+      document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
+
+      // Locate profile on map
+      locateAddress(profileData.address);
     }
 
-    // Geocode the profile location and place a marker
-    geocodePlace(profileData.location);
+    function locateAddress(address) {
+      if (!address) {
+        console.warn("No address found, using default location.");
+        return;
+      }
+
+      geocoder.geocode({ address: address }, (results, status) => {
+          if (status === "OK") {
+              const location = results[0].geometry.location;
+              map.setCenter(location);
+              new google.maps.Marker({
+                  map,
+                  position: location,
+                  title: address,
+              });
+          } else {
+              console.error("Geocode failed: " + status);
+              alert("Unable to find location on the map.");
+          }
+      });
+    }
   </script>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+</body>
+</html> -->
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .profile-details-container {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+    .profile-header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .profile-info {
+      flex-grow: 1;
+    }
+    .profile-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    #map {
+      height: 400px;
+      width: 90%;
+      max-width: 600px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profile Details</h1>
+  <div class="profile-details-container">
+    <div class="profile-header">
+      <img id="profile-image" src="" alt="Profile Image">
+      <div class="profile-info">
+        <h2 id="profile-name"></h2>
+        <p id="profile-age"></p>
+        <p id="profile-profession"></p>
+        <p id="profile-preference"></p>
+        <p id="profile-about"></p>
+        <p id="profile-location"></p>
+      </div>
+    </div>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    let map, geocoder;
+
+    function initMap() {
+      geocoder = new google.maps.Geocoder();
+      map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 10,
+          center: { lat: 39.8283, lng: -98.5795 }, // Default location (USA)
+      });
+
+      const profileData = JSON.parse(sessionStorage.getItem('profileData'));
+
+      if (!profileData) {
+        alert("No profile data found.");
+        return;
+      }
+
+      // ✅ Debugging - Check if address is being passed
+      console.log("Profile Address:", profileData.address);
+
+      // Populate profile details
+      document.getElementById('profile-name').textContent = profileData.profileName || "Unknown";
+      document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
+      document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
+      document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking || "N/A"}, ${profileData.alcohol || "N/A"}`;
+      document.getElementById('profile-about').textContent = profileData.description || "No description available.";
+      document.getElementById('profile-location').textContent = `Location: ${profileData.address || "Location not available"}`;
+      document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
+
+      // 📌 Locate address on Google Map
+      locateAddress(profileData.address);
+    }
+
+    function locateAddress(address) {
+      if (!address) {
+        console.warn("No address found, using default location.");
+        return;
+      }
+
+      geocoder.geocode({ address: address }, (results, status) => {
+          if (status === "OK" && results.length > 0) {
+              const location = results[0].geometry.location;
+              map.setCenter(location);
+              new google.maps.Marker({
+                  map,
+                  position: location,
+                  title: address,
+              });
+          } else {
+              console.error("Geocode failed: " + status);
+              alert("Unable to find location on the map.");
+          }
+      });
+    }
+  </script>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .profile-details-container {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+    .profile-header img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .profile-info {
+      flex-grow: 1;
+    }
+    .profile-info h2 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    .map-link {
+      margin-top: 15px;
+      font-size: 16px;
+      color: blue;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Profile Details</h1>
+  <div class="profile-details-container">
+    <div class="profile-header">
+      <img id="profile-image" src="" alt="Profile Image">
+      <div class="profile-info">
+        <h2 id="profile-name"></h2>
+        <p id="profile-age"></p>
+        <p id="profile-profession"></p>
+        <p id="profile-preference"></p>
+        <p id="profile-about"></p>
+        <p id="profile-location"></p>
+        <a id="map-link" class="map-link" href="#" target="_blank">📍 View on Google Maps</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const profileData = JSON.parse(sessionStorage.getItem('profileData'));
+
+    if (profileData) {
+      document.getElementById('profile-name').textContent = profileData.profileName || "Unknown";
+      document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
+      document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
+      document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking || "N/A"}, ${profileData.alcohol || "N/A"}`;
+      document.getElementById('profile-about').textContent = profileData.description || "No description available.";
+      document.getElementById('profile-location').textContent = `Location: ${profileData.address || "Location not available"}`;
+      document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
+
+      // ✅ Create Google Maps link dynamically
+      const mapLink = document.getElementById('map-link');
+      if (profileData.address) {
+        mapLink.href = `https://www.google.com/maps/search/?q=${encodeURIComponent(profileData.address)}`;
+      } else {
+        mapLink.style.display = "none"; // Hide link if no address is found
+      }
+    } else {
+      alert("No profile data found.");
+    }
+  </script>
+
 </body>
 </html>
