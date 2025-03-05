@@ -1,3 +1,124 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roommate Profiles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #b3d9ea;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 30px;
+            color: #333;
+        }
+        .profiles-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            overflow: hidden;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-card:hover {
+            transform: scale(1.05);
+        }
+        .profile-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .profile-content {
+            padding: 15px;
+        }
+        .profile-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .profile-info {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Roommate Profiles</h1>
+
+    <div class="section-title">Looking for a Room</div>
+    <div class="profiles-container" id="looking-for-room"></div>
+
+    <div class="section-title">Has a Room</div>
+    <div class="profiles-container" id="has-room"></div>
+
+    <script>
+        async function fetchProfiles() {
+            try {
+                const response = await fetch('/profile/all'); // Replace with actual API endpoint
+                const data = await response.json();
+
+                const lookingForRoomContainer = document.getElementById('looking-for-room');
+                const hasRoomContainer = document.getElementById('has-room');
+
+                lookingForRoomContainer.innerHTML = '';
+                hasRoomContainer.innerHTML = '';
+
+                data.forEach(entry => {
+                    const imageSrc = entry.image || 'https://via.placeholder.com/250';
+
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.innerHTML = `
+                        <img src="${imageSrc}" alt="Profile Picture">
+                        <div class="profile-content">
+                            <div class="profile-name">${entry.profileName || 'N/A'}</div>
+                            <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'}</div>
+                            <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
+                            <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
+                        </div>
+                    `;
+
+                    card.onclick = () => {
+                        sessionStorage.setItem('profileData', JSON.stringify(entry));
+                        window.location.href = 'profile-details.html';
+                    };
+
+                    if (entry.hasRoom) {
+                        hasRoomContainer.appendChild(card);
+                    } else {
+                        lookingForRoomContainer.appendChild(card);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching profiles:', error);
+            }
+        }
+
+        window.onload = fetchProfiles;
+    </script>
+</body>
+</html> -->
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +159,12 @@
         h1 {
             margin-bottom: 20px;
         }
+        .section-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 30px;
+            color: #333;
+        }
         .profiles-container {
             display: flex;
             flex-wrap: wrap;
@@ -52,6 +179,11 @@
             width: 250px;
             overflow: hidden;
             text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .profile-card:hover {
+            transform: scale(1.05);
         }
         .profile-card img {
             width: 100%;
@@ -77,51 +209,60 @@
     <div class="navbar">
         <div class="logo">RoomMate</div>
         <div class="nav-links">
-            <a href="responses.html">Profiles </a>
+            <a href="responses.html">Profiles</a>
             <a href="roomdetails.html">Rooms</a>
             <a href="index.html">Log Out</a>
         </div>
     </div>
     <h1>Roommate Profiles</h1>
-    <div class="profiles-container" id="profiles-container">
-        <!-- Profiles will be inserted dynamically here -->
-    </div>
+
 
     <script>
-async function fetchProfiles() {
-    try {
-        const response = await fetch('/profile/all'); // Fetch from updated endpoint
-        const data = await response.json();
+        async function fetchProfiles() {
+            try {
+                const response = await fetch('/profile/all');
+                const data = await response.json();
 
-        const container = document.getElementById('profiles-container');
-        container.innerHTML = '';
+                const lookingForRoomContainer = document.getElementById('looking-for-room');
+                const hasRoomContainer = document.getElementById('has-room');
 
-        data.forEach(entry => {
-            const imageSrc = entry.image 
-                ? `${entry.image}`  // Correct Base64 format
-                : 'https://via.placeholder.com/250'; 
-                const card = `
-                <div class="profile-card">
-                    <img src="${imageSrc}" alt="Profile Picture" onerror="this.onerror=null;this.src='https://via.placeholder.com/250';">
-                    <div class="profile-content">
-                        <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                        <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'} | ${entry.address || 'N/A'}</div>
-                        <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
-                        
-                    </div>
-                </div>
-            `;
+                lookingForRoomContainer.innerHTML = '';
+                hasRoomContainer.innerHTML = '';
 
-            container.insertAdjacentHTML('beforeend', card);
-        });
+                data.forEach(entry => {
+                    const imageSrc = entry.image || 'https://via.placeholder.com/250';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'profile-card';
+                    card.innerHTML = `
+                        <img src="${imageSrc}" alt="Profile Picture" onerror="this.onerror=null;this.src='https://via.placeholder.com/250';">
+                        <div class="profile-content">
+                            <div class="profile-name">${entry.profileName || 'N/A'}</div>
+                            <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'}</div>
+                            <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
+                            <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
+                            <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
+                        </div>
+                    `;
 
-    } catch (error) {
-        console.error('Error fetching profiles:', error);
-    }
-}
+                    card.onclick = () => {
+                        sessionStorage.setItem('profileData', JSON.stringify(entry));
+                        window.location.href = 'profile-details.html';
+                    };
 
-window.onload = fetchProfiles;
+                    if (entry.hasRoom) {
+                        hasRoomContainer.appendChild(card);
+                    } else {
+                        lookingForRoomContainer.appendChild(card);
+                    }
+                });
 
+            } catch (error) {
+                console.error('Error fetching profiles:', error);
+            }
+        }
+
+        window.onload = fetchProfiles;
     </script>
 </body>
 </html>
