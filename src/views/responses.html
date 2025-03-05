@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,6 +12,17 @@
         }
         h1 {
             margin-bottom: 20px;
+        }
+        .filters-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter {
+            padding: 8px;
+            font-size: 14px;
         }
         .section-title {
             font-size: 22px;
@@ -56,80 +67,6 @@
             font-size: 14px;
             color: #555;
             margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Roommate Profiles</h1>
-
-    <div class="section-title">Looking for a Room</div>
-    <div class="profiles-container" id="looking-for-room"></div>
-
-    <div class="section-title">Has a Room</div>
-    <div class="profiles-container" id="has-room"></div>
-
-    <script>
-        async function fetchProfiles() {
-            try {
-                const response = await fetch('/profile/all'); // Replace with actual API endpoint
-                const data = await response.json();
-
-                const lookingForRoomContainer = document.getElementById('looking-for-room');
-                const hasRoomContainer = document.getElementById('has-room');
-
-                lookingForRoomContainer.innerHTML = '';
-                hasRoomContainer.innerHTML = '';
-
-                data.forEach(entry => {
-                    const imageSrc = entry.image || 'https://via.placeholder.com/250';
-
-                    const card = document.createElement('div');
-                    card.className = 'profile-card';
-                    card.innerHTML = `
-                        <img src="${imageSrc}" alt="Profile Picture">
-                        <div class="profile-content">
-                            <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                            <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'}</div>
-                            <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                            <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
-                        </div>
-                    `;
-
-                    card.onclick = () => {
-                        sessionStorage.setItem('profileData', JSON.stringify(entry));
-                        window.location.href = 'profile-details.html';
-                    };
-
-                    if (entry.hasRoom) {
-                        hasRoomContainer.appendChild(card);
-                    } else {
-                        lookingForRoomContainer.appendChild(card);
-                    }
-                });
-
-            } catch (error) {
-                console.error('Error fetching profiles:', error);
-            }
-        }
-
-        window.onload = fetchProfiles;
-    </script>
-</body>
-</html> -->
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roommate Profiles</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #b3d9ea;
-            text-align: center;
         }
         .navbar {
             display: flex;
@@ -156,53 +93,6 @@
         .nav-links a:hover {
             color: #0073e6;
         }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .section-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 30px;
-            color: #333;
-        }
-        .profiles-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-        .profile-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            width: 250px;
-            overflow: hidden;
-            text-align: left;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .profile-card:hover {
-            transform: scale(1.05);
-        }
-        .profile-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .profile-content {
-            padding: 15px;
-        }
-        .profile-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .profile-info {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -216,50 +106,101 @@
     </div>
     <h1>Roommate Profiles</h1>
 
+    <!-- Filters Section -->
+    <div class="filters-container">
+        <input type="number" id="minAge" class="filter" placeholder="Min Age" min="18">
+        <input type="number" id="maxAge" class="filter" placeholder="Max Age" min="18">
+        <select id="genderFilter" class="filter">
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+        <input type="text" id="locationFilter" class="filter" placeholder="Location">
+        <select id="smokingFilter" class="filter">
+            <option value="">Smoking Preference</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+        <select id="alcoholFilter" class="filter">
+            <option value="">Alcohol Preference</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+        <button onclick="applyFilters()" class="filter">Apply Filters</button>
+    </div>
+
+    <div class="section-title">Looking for a Room</div>
+    <div class="profiles-container" id="looking-for-room"></div>
+
+    <div class="section-title">Has a Room</div>
+    <div class="profiles-container" id="has-room"></div>
 
     <script>
+        let profiles = []; // Store fetched profiles globally
+
         async function fetchProfiles() {
             try {
-                const response = await fetch('/profile/all');
-                const data = await response.json();
-
-                const lookingForRoomContainer = document.getElementById('looking-for-room');
-                const hasRoomContainer = document.getElementById('has-room');
-
-                lookingForRoomContainer.innerHTML = '';
-                hasRoomContainer.innerHTML = '';
-
-                data.forEach(entry => {
-                    const imageSrc = entry.image || 'https://via.placeholder.com/250';
-                    
-                    const card = document.createElement('div');
-                    card.className = 'profile-card';
-                    card.innerHTML = `
-                        <img src="${imageSrc}" alt="Profile Picture" onerror="this.onerror=null;this.src='https://via.placeholder.com/250';">
-                        <div class="profile-content">
-                            <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                            <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'}</div>
-                            <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                            <div class="profile-info"><strong>Looking for:</strong> ${entry.smoking || 'N/A'}, ${entry.alcohol || 'N/A'}</div>
-                            <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
-                        </div>
-                    `;
-
-                    card.onclick = () => {
-                        sessionStorage.setItem('profileData', JSON.stringify(entry));
-                        window.location.href = 'profile-details.html';
-                    };
-
-                    if (entry.hasRoom) {
-                        hasRoomContainer.appendChild(card);
-                    } else {
-                        lookingForRoomContainer.appendChild(card);
-                    }
-                });
-
+                const response = await fetch('/profile/all'); // API endpoint
+                profiles = await response.json();
+                displayProfiles(profiles);
             } catch (error) {
                 console.error('Error fetching profiles:', error);
             }
+        }
+
+        function displayProfiles(data) {
+            const lookingForRoomContainer = document.getElementById('looking-for-room');
+            const hasRoomContainer = document.getElementById('has-room');
+
+            lookingForRoomContainer.innerHTML = '';
+            hasRoomContainer.innerHTML = '';
+
+            data.forEach(entry => {
+                const imageSrc = entry.image || 'https://via.placeholder.com/250';
+
+                const card = document.createElement('div');
+                card.className = 'profile-card';
+                card.innerHTML = `
+                    <img src="${imageSrc}" alt="Profile Picture">
+                    <div class="profile-content">
+                        <div class="profile-name">${entry.profileName || 'N/A'}</div>
+                        <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
+                        <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
+                        <div class="profile-info"><strong>Preferences:</strong> Smoking: ${entry.smoking || 'N/A'}, Alcohol: ${entry.alcohol || 'N/A'}</div>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    sessionStorage.setItem('profileData', JSON.stringify(entry));
+                    window.location.href = 'profile-details.html';
+                };
+
+                if (entry.hasRoom) {
+                    hasRoomContainer.appendChild(card);
+                } else {
+                    lookingForRoomContainer.appendChild(card);
+                }
+            });
+        }
+
+        function applyFilters() {
+            let filteredProfiles = profiles;
+            const minAge = document.getElementById('minAge').value;
+            const maxAge = document.getElementById('maxAge').value;
+            const gender = document.getElementById('genderFilter').value;
+            const location = document.getElementById('locationFilter').value.toLowerCase();
+            const smoking = document.getElementById('smokingFilter').value;
+            const alcohol = document.getElementById('alcoholFilter').value;
+
+            if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
+            if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
+            if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
+            if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
+            if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
+            if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
+
+            displayProfiles(filteredProfiles);
         }
 
         window.onload = fetchProfiles;
