@@ -71,6 +71,10 @@ app.post('/verifyOtp', (req, res) => {
     }
 });
 
+
+  
+  
+
 // **Static files**
 app.use(express.static(path.join(__dirname, 'views')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));

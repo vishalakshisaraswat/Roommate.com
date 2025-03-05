@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roommate Profiles</title>
+    <title>Available Rooms</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #b3d9ea;
             text-align: center;
+            margin: 0;
+            padding: 0;
         }
         .navbar {
             display: flex;
@@ -35,38 +37,38 @@
         .nav-links a:hover {
             color: #0073e6;
         }
-        h1 {
-            margin-bottom: 20px;
+        .container {
+            padding: 20px;
         }
-        .profiles-container {
+        .rooms-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
             padding: 20px;
         }
-        .profile-card {
+        .room-card {
             background: white;
             border-radius: 10px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            width: 250px;
+            width: 300px;
             overflow: hidden;
             text-align: left;
         }
-        .profile-card img {
+        .room-card img {
             width: 100%;
             height: 200px;
             object-fit: cover;
         }
-        .profile-content {
+        .room-content {
             padding: 15px;
         }
-        .profile-name {
+        .room-title {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 5px;
         }
-        .profile-info {
+        .room-info {
             font-size: 14px;
             color: #555;
             margin-bottom: 10px;
@@ -77,37 +79,40 @@
     <div class="navbar">
         <div class="logo">RoomMate</div>
         <div class="nav-links">
-            <a href="responses.html">Profiles </a>
+            <a href="index.html">Home</a>
+            <a href="responses.html">Profiles</a>
             <a href="roomdetails.html">Rooms</a>
-            <a href="index.html">Log Out</a>
         </div>
     </div>
-    <h1>Roommate Profiles</h1>
-    <div class="profiles-container" id="profiles-container">
-        <!-- Profiles will be inserted dynamically here -->
+    
+    <h1>Available Rooms</h1>
+    <div class="rooms-container" id="rooms-container">
+        <!-- Room cards will be inserted dynamically here -->
     </div>
 
-    <script>
-async function fetchProfiles() {
+
+<script>
+async function fetchRooms() {
     try {
-        const response = await fetch('/profile/all'); // Fetch from updated endpoint
+        const response = await fetch('/room/all'); // ✅ Correct route
         const data = await response.json();
 
-        const container = document.getElementById('profiles-container');
+        const container = document.getElementById('rooms-container');
         container.innerHTML = '';
 
-        data.forEach(entry => {
-            const imageSrc = entry.image 
-                ? `${entry.image}`  // Correct Base64 format
-                : 'https://via.placeholder.com/250'; 
-                const card = `
-                <div class="profile-card">
-                    <img src="${imageSrc}" alt="Profile Picture" onerror="this.onerror=null;this.src='https://via.placeholder.com/250';">
-                    <div class="profile-content">
-                        <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                        <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.userType || 'N/A'} | ${entry.address || 'N/A'}</div>
-                        <div class="profile-info"><strong>About Me:</strong> ${entry.description || 'N/A'}</div>
-                        
+        data.forEach(room => {
+            const imageSrc = (room.photos && room.photos.length > 0)
+                ? room.photos[0] // Uses Base64 image if available
+                : 'https://via.placeholder.com/300'; // Placeholder image
+            
+            const card = `
+                <div class="room-card">
+                    <img src="${imageSrc}" alt="Room Image" onerror="this.onerror=null;this.src='https://via.placeholder.com/300';">
+                    <div class="room-content">
+                        <div class="room-title">${room.address || 'N/A'}</div>
+                        <div class="room-info"><strong>Rent:</strong> ${room.rent || 'N/A'}</div>
+                        <div class="room-info"><strong>Spaces Available:</strong> ${room.availableSpacesForRoommates || 'N/A'}</div>
+                        <div class="room-info"><strong>Description:</strong> ${room.description || 'N/A'}</div>
                     </div>
                 </div>
             `;
@@ -116,12 +121,11 @@ async function fetchProfiles() {
         });
 
     } catch (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('Error fetching rooms:', error);
     }
 }
 
-window.onload = fetchProfiles;
-
-    </script>
+window.onload = fetchRooms;
+</script>
 </body>
 </html>

@@ -66,7 +66,6 @@
                 <label><h2>Do you have any specific preferences for location or neighborhood?</h2></label>
                 <label><input type="radio" name="location_preference" value="yes"> Yes, I have specific preferences</label>
                 <label><input type="radio" name="location_preference" value="no"> No, I do not have any preferences</label>
-                <label><input type="radio" name="location_preference" value="flexible"> I am flexible with the location</label>
             </div>
             
             <div id="address-details" style="display:none; margin-top: 15px;">
@@ -191,10 +190,10 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM fully loaded"); // Debugging log
 
-    const form = document.getElementById('questionnaire-form');
+    const form = document.getElementById('questionaire-form');
     
     if (!form) {
-        console.error("Form not found! Check if 'id=\"questionnaire-form\"' exists in your HTML.");
+        console.error("Form not found! Check if 'id=\"questionaire-form\"' exists in your HTML.");
         return;
     }
 
@@ -228,8 +227,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             const result = await response.json();
-            console.log("Server response:", result); // Debugging log
-            alert(result.message);
+
+            if (response.ok) {
+
+                // Redirect to response.html
+                window.location.href = 'responses.html';
+            } else {
+                alert(result.message || 'Error submitting form. Please try again.');
+            }
         } catch (error) {
             console.error('Error submitting form:', error);
             alert('Error submitting form. Please try again.');
