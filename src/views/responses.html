@@ -117,7 +117,7 @@
             <option value="Other">Other</option>
         </select>
         <input type="text" id="locationFilter" class="filter" placeholder="Location">
-        <select id="smokingFilter" class="filter">
+        <!-- <select id="smokingFilter" class="filter">
             <option value="">Smoking Preference</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -126,7 +126,7 @@
             <option value="">Alcohol Preference</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
-        </select>
+        </select> -->
         <button onclick="applyFilters()" class="filter">Apply Filters</button>
     </div>
 
@@ -165,7 +165,7 @@
                         <div class="profile-name">${entry.profileName || 'N/A'}</div>
                         <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
                         <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                        <div class="profile-info"><strong>Preferences:</strong> Smoking: ${entry.smoking || 'N/A'}, Alcohol: ${entry.alcohol || 'N/A'}</div>
+                        
                     </div>
                 `;
 
@@ -188,15 +188,15 @@
             const maxAge = document.getElementById('maxAge').value;
             const gender = document.getElementById('genderFilter').value;
             const location = document.getElementById('locationFilter').value.toLowerCase();
-            const smoking = document.getElementById('smokingFilter').value;
-            const alcohol = document.getElementById('alcoholFilter').value;
+            // const smoking = document.getElementById('smokingFilter').value;
+            // const alcohol = document.getElementById('alcoholFilter').value;
 
             if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
             if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
             if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
             if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
-            if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
-            if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
+            // if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
+            // if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
 
             displayProfiles(filteredProfiles);
         }
