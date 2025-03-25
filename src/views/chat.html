@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h2>Private Chat</h2>
+    
+    <label>Enter Your Name:</label>
+    <input type="text" id="username">
+    <button onclick="joinChat()">Join</button>
+
+    <br><br>
+
+    <label>Chat with:</label>
+    <input type="text" id="receiver">
+    
+    <div id="chatBox"></div>
+
+    <input type="text" id="messageInput" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const socket = io();
+        let username = '';
+
+        function joinChat() {
+            username = document.getElementById('username').value;
+            socket.emit('join', username);
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            const receiver = document.getElementById('receiver').value;
+
+            if (receiver && message) {
+                socket.emit('privateMessage', { sender: username, receiver, message });
+                document.getElementById('chatBox').innerHTML += `<p><b>You:</b> ${message}</p>`;
+                document.getElementById('messageInput').value = '';
+            }
+        }
+
+        socket.on('privateMessage', (data) => {
+            document.getElementById('chatBox').innerHTML += `<p><b>${data.sender}:</b> ${data.message}</p>`;
+        });
+    </script>
+</body>
+</html>
