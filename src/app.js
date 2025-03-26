@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes.js');
 const questionaireRoutes = require('./routes/questionaireRoutes.js');
 const roomRoutes = require('./routes/roomRoutes.js');
+const expenseRoutes = require('./routes/expenseRoutes.js');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
@@ -84,12 +85,15 @@ app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 
 app.get('/room', (req, res) => res.sendFile(path.join(__dirname, 'views', 'room.html')));
 app.get('/quessionaire', (req, res) => res.sendFile(path.join(__dirname, 'views', 'quessionaire.html')));
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
+app.get('/expenses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'expenses.html')));
 
 // **Routes**
 app.use('/', userRoutes);
 app.use('/profile', profileRoutes);
 app.use('/room', roomRoutes);
 app.use('/questionaire', questionaireRoutes);
+app.use('/', expenseRoutes);
+
 
 // **Start server**
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
