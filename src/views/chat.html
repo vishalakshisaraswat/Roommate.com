@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">RoomMate</div>
+        <div class="nav-links">
+            <a href="responses.html">Profiles</a>
+            <a href="roomdetails.html">Rooms</a>
+            <a href="chat.html">Chat</a>
+            <a href="../iLanding/index.html">Log Out</a>
+        </div>
+    </div>
+    <h2>Private Chat</h2>
+    
+    <label>Enter Your Name:</label>
+    <input type="text" id="username">
+    <button onclick="joinChat()">Join</button>
+
+    <br><br>
+
+    <label>Chat with:</label>
+    <input type="text" id="receiver">
+    
+    <div id="chatBox"></div>
+
+    <input type="text" id="messageInput" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const socket = io();
+        let username = '';
+    
+        socket.on('chatHistory', (messages) => {
+            messages.forEach(({ sender, message }) => {
+                displayMessage(sender, message);
+            });
+        });
+    
+        function displayMessage(sender, message) {
+            const chatBox = document.getElementById('chatBox'); // Corrected ID
+            const messageElement = document.createElement('p');
+            messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatBox.appendChild(messageElement);
+        }
+    
+        function joinChat() {
+            username = document.getElementById('username').value;
+            socket.emit('join', username);
+        }
+    
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            const receiver = document.getElementById('receiver').value;
+    
+            if (receiver && message) {
+                socket.emit('privateMessage', { sender: username, receiver, message });
+                displayMessage("You", message); // Display message immediately
+                document.getElementById('messageInput').value = '';
+            }
+        }
+    
+        socket.on('privateMessage', (data) => {
+            displayMessage(data.sender, data.message);
+        });
+    </script>
+    
+</body>
+</html>

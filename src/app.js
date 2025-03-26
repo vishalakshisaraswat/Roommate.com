@@ -1,17 +1,28 @@
+
 const express = require('express');
-const connectDB = require('./config/db');
+const http = require('http');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const path = require('path');
+const cors = require('cors');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+
+const connectDB = require('./config/db');
 const Profile = require('./models/profile');
 const Questionaire = require('./models/questionaire');
+const Chat = require('./models/chat'); // Chat model
 const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes.js');
 const questionaireRoutes = require('./routes/questionaireRoutes.js');
 const roomRoutes = require('./routes/roomRoutes.js');
 const expenseRoutes = require('./routes/expenseRoutes.js');
-const bodyParser = require('body-parser');
-const path = require('path');
-const cors = require('cors');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const chatRoutes = require('./routes/chatRoutes.js');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+const PORT = process.env.PORT || 3000;
 
 const otpStore = {}; // Temporary OTP storage
 const dummyData = new Set([
@@ -22,9 +33,6 @@ const dummyData = new Set([
   "334455667788"
 ]);
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -32,11 +40,61 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // Connect to database
 connectDB();
 
+const users = {}; // Store connected users (socket.id -> username)
+
+// WebSocket connection
+io.on('connection', async (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('join', async (username) => {
+        users[socket.id] = username;
+        console.log(`${username} joined the chat.`);
+
+        try {
+            // Fetch previous messages where the user is either sender or receiver
+            const chatHistory = await Chat.find({
+                $or: [{ sender: username }, { receiver: username }]
+            }).sort({ createdAt: 1 }); // Sort by oldest first
+
+            // Send chat history to the user
+            socket.emit('chatHistory', chatHistory);
+        } catch (error) {
+            console.error('Error fetching chat history:', error);
+        }
+    });
+
+    socket.on('privateMessage', async ({ sender, receiver, message }) => {
+        const receiverSocketId = Object.keys(users).find(key => users[key] === receiver);
+
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('privateMessage', { sender, message });
+        }
+
+        try {
+            const newMessage = new Chat({ sender, receiver, message });
+            await newMessage.save();
+            io.emit('receiveMessage', { sender, receiver, message }); // Emit to all
+        } catch (error) {
+            console.error('Error saving message:', error);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        if (users[socket.id]) {
+            console.log(`${users[socket.id]} disconnected`);
+            delete users[socket.id];
+        }
+    });
+});
+
+
 app.get('/', (req, res) => {
     res.send('Welcome to the Aadhaar e-KYC API!');
 });
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'chat.html'));
+});
 
-// **Send Aadhaar & Generate OTP (Only if Aadhaar exists in dummyData)**
 app.post('/sendAadhaar', async (req, res) => {
     const { aadhaar } = req.body;
 
@@ -56,7 +114,6 @@ app.post('/sendAadhaar', async (req, res) => {
     res.status(200).json({ message: "OTP Sent", aadhaar });
 });
 
-// **Verify OTP**
 app.post('/verifyOtp', (req, res) => {
     const { aadhaar, otp } = req.body;
 
@@ -72,28 +129,26 @@ app.post('/verifyOtp', (req, res) => {
     }
 });
 
-
-  
-  
-
-// **Static files**
+// Static files
 app.use(express.static(path.join(__dirname, 'views')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-// **Serve HTML pages**
+// Serve HTML pages
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'login.html')));
 app.get('/room', (req, res) => res.sendFile(path.join(__dirname, 'views', 'room.html')));
 app.get('/quessionaire', (req, res) => res.sendFile(path.join(__dirname, 'views', 'quessionaire.html')));
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
+app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'views', 'chat.html')));
 app.get('/expenses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'expenses.html')));
 
-// **Routes**
+// Routes
 app.use('/', userRoutes);
 app.use('/profile', profileRoutes);
 app.use('/room', roomRoutes);
 app.use('/questionaire', questionaireRoutes);
+app.use('/chat', chatRoutes);
 app.use('/', expenseRoutes);
 
 
-// **Start server**
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Start server
+server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

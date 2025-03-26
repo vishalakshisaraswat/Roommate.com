@@ -75,8 +75,9 @@
             
             <div class="question">
                 <label><h2>What is your budget range for renting a room?</h2></label>
-                <textarea name="room-budget" placeholder="Enter your budget range here..." rows="3" cols="40"></textarea>
+                <input type="number" name="room-budget" placeholder="Enter your budget..." min="1" step="1" required>
             </div>
+            
             <div class="question">
                 <label><h2>What type of accommodation are you looking for?</h2></label>
                 <label><input type="radio" name="accommodation-type" value="apartment"> Apartment</label>
