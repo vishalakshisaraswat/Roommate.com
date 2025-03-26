@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roommate Preferences</title>
+    <link rel="stylesheet" href="stl.css">
+</head>
+<body>
+    <div class="card">
+        <h1><u>Roommate Preferences</u></h1>
+        <form id="questionaire-form" action="/questionaire/submit-form" method="POST">
+            
+            <!-- Gender Preference -->
+            <div class="question">
+                <label><h2>Preferred gender for your roommate:</h2></label>
+                <label><input type="radio" name="gender-preference" value="male" required> Male</label>
+                <label><input type="radio" name="gender-preference" value="female"> Female</label>
+                <label><input type="radio" name="gender-preference" value="no-preference"> No Preference</label>
+            </div>
+
+            <!-- Age Input -->
+            <div class="question">
+                <label><h2>Enter your age:</h2></label>
+                <input type="number" id="age-input" name="age" min="0" placeholder="Enter your age" required>
+                <small id="age-error" style="color: red; display: none;">Age cannot be negative!</small>
+            </div>
+
+            <!-- Age Group -->
+            <div class="question">
+                <label><h2>Preferred age range for your roommate:</h2></label>
+                <select name="age-group" required>
+                    <option value="" disabled selected>Select age group</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36-45">36-45</option>
+                    <option value="no-preference">No Preference</option>
+                </select>
+            </div>
+
+            <!-- Sleeping Schedule -->
+            <div class="question">
+                <label><h2>Your preferred sleeping schedule:</h2></label>
+                <label><input type="radio" name="sleeping-schedule" value="morning-person" required> Morning Person</label>
+                <label><input type="radio" name="sleeping-schedule" value="night-person"> Night Person</label>
+                <label><input type="radio" name="sleeping-schedule" value="no-preference"> No Preference</label>
+            </div>
+
+            <!-- Work/Study Schedule -->
+            <div class="question">
+                <label><h2>What is your current work or study schedule?</h2></label>
+                <label><input type="radio" name="work_arrangement" value="work-from-home"> Work from Home</label>
+                <label><input type="radio" name="work_arrangement" value="on-site-work"> On-site Work</label>
+                <label><input type="radio" name="work_arrangement" value="student"> Student</label>
+            </div>
+
+            <!-- Location Preference -->
+            <div class="question">
+                <label><h2>Do you have any specific preferences for location or neighborhood?</h2></label>
+                <label><input type="radio" name="location_preference" value="yes"> Yes, I have specific preferences</label>
+                <label><input type="radio" name="location_preference" value="no"> No, I do not have any preferences</label>
+            </div>
+
+            <div id="address-details" style="display:none; margin-top: 15px;">
+                <label for="specific-address">Please provide the complete address or location details:</label>
+                <textarea id="specific-address" name="specific_address" rows="4" placeholder="Enter your preferred location or neighborhood"></textarea>
+            </div>
+
+            <!-- Budget -->
+            <div class="question">
+                <label><h2>What is your budget range for renting a room?</h2></label>
+                <textarea name="room-budget" placeholder="Enter your budget range here..." rows="3" cols="40"></textarea>
+            </div>
+
+            <!-- Language Preference -->
+            <div class="question">
+                <label><h2>Which language are you comfortable with?</h2></label>
+                <select id="language_select" name="language" onchange="toggleOtherLanguage(this.value)">
+                    <option value="" disabled selected>Select a language</option>
+                    <option value="Hindi">Hindi</option>
+                    <option value="English">English</option>
+                    <option value="Tamil">Tamil</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div id="other_language_input" style="display:none; margin-top: 10px;">
+                    <label for="other_language">Please specify:</label>
+                    <textarea id="other_language" name="other_language" rows="2" cols="30" placeholder="Enter other languages here"></textarea>
+                </div>
+            </div>
+
+            <!-- Smoking Preference -->
+            <div class="question">
+                <label><h2>Are you comfortable sharing a room with a smoker?</h2></label>
+                <label><input type="radio" name="smoking" value="yes" required> Yes</label>
+                <label><input type="radio" name="smoking" value="no"> No</label>
+            </div>
+
+            <!-- Pets -->
+            <div class="question">
+                <label><h2>Do you own pets or have any preferences regarding living with pets?</h2></label>
+                <label><input type="radio" name="pets" value="own-and-comfortable"> Yes, I own pets and I’m comfortable living with them.</label>
+                <label><input type="radio" name="pets" value="not-comfortable"> No, I’m not comfortable living with pets.</label>
+            </div>
+
+            <!-- Additional Preferences -->
+            <div class="question">
+                <label for="additional-preferences"><h2>Additional Preferences or Notes:</h2></label>
+                <textarea id="additional-preferences" name="additional-preferences" placeholder="Write your preferences..." rows="4"></textarea>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ageInput = document.getElementById("age-input");
+            const ageError = document.getElementById("age-error");
+
+            ageInput.addEventListener("input", function () {
+                if (ageInput.value < 0) {
+                    ageError.style.display = "block";
+                    ageInput.value = "";
+                } else {
+                    ageError.style.display = "none";
+                }
+            });
+
+            const radios = document.querySelectorAll('input[name="location_preference"]');
+            const addressDiv = document.getElementById('address-details');
+        
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    addressDiv.style.display = (radio.value === 'yes') ? 'block' : 'none';
+                });
+            });
+
+            function toggleOtherLanguage(value) {
+                const otherInput = document.getElementById("other_language_input");
+                otherInput.style.display = (value === "Other") ? "block" : "none";
+            }
+        });
+    </script>
+</body>
+</html>
+
