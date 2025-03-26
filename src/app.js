@@ -42,12 +42,24 @@ connectDB();
 const users = {}; // Store connected users (socket.id -> username)
 
 // WebSocket connection
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log('User connected:', socket.id);
-    
-    socket.on('join', (username) => {
+
+    socket.on('join', async (username) => {
         users[socket.id] = username;
         console.log(`${username} joined the chat.`);
+
+        try {
+            // Fetch previous messages where the user is either sender or receiver
+            const chatHistory = await Chat.find({
+                $or: [{ sender: username }, { receiver: username }]
+            }).sort({ createdAt: 1 }); // Sort by oldest first
+
+            // Send chat history to the user
+            socket.emit('chatHistory', chatHistory);
+        } catch (error) {
+            console.error('Error fetching chat history:', error);
+        }
     });
 
     socket.on('privateMessage', async ({ sender, receiver, message }) => {
@@ -57,15 +69,23 @@ io.on('connection', (socket) => {
             io.to(receiverSocketId).emit('privateMessage', { sender, message });
         }
 
-        const newMessage = new Chat({ sender, receiver, message });
-        await newMessage.save();
+        try {
+            const newMessage = new Chat({ sender, receiver, message });
+            await newMessage.save();
+            io.emit('receiveMessage', { sender, receiver, message }); // Emit to all
+        } catch (error) {
+            console.error('Error saving message:', error);
+        }
     });
 
     socket.on('disconnect', () => {
-        console.log(`${users[socket.id]} disconnected`);
-        delete users[socket.id];
+        if (users[socket.id]) {
+            console.log(`${users[socket.id]} disconnected`);
+            delete users[socket.id];
+        }
     });
 });
+
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Aadhaar e-KYC API!');

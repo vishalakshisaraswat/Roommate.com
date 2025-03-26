@@ -70,11 +70,60 @@ router.post('/login', async (req, res) => {
     // res.json({ message: 'Login successful', token });
     // res.redirect('/profile.html');
     // Redirect (if using frontend routing)
+    res.sendFile(path.join(__dirname, '../views/responses.html'));
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({ message: 'Error during login', error: err.message });
+  }
+});
+
+
+// jjjjjjjjjjjjjjjjjjjjjjj
+
+//Login-signup Page
+router.get('/login-signup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../views/login.html'));
+});
+
+// Login
+router.post('/login-signup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Compare passwords
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email }, // Fixed `userId` field
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Send token in response (optional)
+    // res.json({ message: 'Login successful', token });
+    // res.redirect('/profile.html');
+    // Redirect (if using frontend routing)
     res.sendFile(path.join(__dirname, '../views/profile.html'));
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: 'Error during login', error: err.message });
   }
 });
+
+
 
 module.exports = router;
