@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+</head>
+<body>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif; 
+            margin: 20px;
+            background-color: #ADD8E6; 
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white; 
+            padding: 20px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        button {
+            margin-top: 10px;
+            background-color: #51f71f;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #ecec77;
+        }
+    </style>
+
+    <form id="resume-form" enctype="multipart/form-data">
+        <h1>Profile Details</h1>
+
+        <label for="name"><h3>Full Name:</h3></label>
+        <input type="text" id="name" name="profileName" required>
+
+        <h3>Select your Gender</h3>
+        <label><input type="radio" name="gender" value="Male" required> Male</label>
+        <label><input type="radio" name="gender" value="Female" required> Female</label>
+        <label><input type="radio" name="gender" value="Other" required> Other</label>
+
+        <h3>User Type</h3>
+        <label><input type="radio" name="userType" value="roommateSeekerWithRoom" required> Roommate seeker with room</label>
+        <label><input type="radio" name="userType" value="roommateSeekerWithoutRoom" required> Roommate seeker without room</label>
+
+        <label for="age"><h3>Age:</h3></label>
+        <input type="number" id="age" name="age" placeholder="Enter your age" required>
+        
+        <script>
+            document.getElementById('age').addEventListener('input', function () {
+                if (this.value < 1) {
+                    alert('Age cannot be 0 or negative.');
+                    this.value = '';
+                }
+            });
+        </script>
+
+        <h3>Which language are you comfortable with?</h3>
+        <select id="language_select" name="language" onchange="toggleOtherLanguage(this.value)">
+            <option value="" disabled selected>Select a language</option>
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+            <option value="Tamil">Tamil</option>
+            <option value="Telugu">Telugu</option>
+            <option value="Kannada">Kannada</option>
+            <option value="Manipuri">Manipuri</option>
+            <option value="Maithili">Maithili</option>
+            <option value="Punjabi">Punjabi</option>
+            <option value="Odia">Odia</option>
+            <option value="Nepali">Nepali</option>
+            <option value="Marathi">Marathi</option>
+            <option value="Malayalam">Malayalam</option>
+            <option value="Konkani">Konkani</option>
+            <option value="Kashmiri">Kashmiri</option>
+            <option value="Assamese">Assamese</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <div id="other_language_input" style="display:none; margin-top: 10px;">
+            <label for="other_language">Please specify:</label>
+            <textarea id="other_language" name="other_language" rows="2" cols="30"></textarea>
+        </div>
+
+        <label for="address"><h3>Address:</h3></label>
+        <input type="text" id="address" name="address" required>
+
+        <label for="description"><h3>Description:</h3></label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+
+        <label for="image"><h3>Upload Profile Picture:</h3></label>
+        <input type="file" id="image" name="image" accept="image/*" required>
+        <img id="preview" src="#" alt="Profile Image Preview" style="display:none; width: 100px; height: 100px;">
+        <canvas id="faceCanvas" style="display: none;"></canvas>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+       
+
+        // Load Face API models
+        async function loadFaceAPIModels() {
+            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+        }
+        loadFaceAPIModels();
+
+        // Handle image upload and face detection
+        document.getElementById('image').addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').style.display = 'block';
+
+                    // Detect face
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async function() {
+                        const canvas = document.getElementById('faceCanvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+
+                        const detections = await faceapi.detectAllFaces(canvas, new faceapi.TinyFaceDetectorOptions());
+                        if (detections.length === 0) {
+                            alert("No human face detected. Please upload a valid profile picture.");
+                            document.getElementById('image').value = ""; // Reset input
+                            document.getElementById('preview').style.display = 'none';
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Submit form
+        document.getElementById('resume-form').addEventListener('submit', async function (event) {
+          event.preventDefault();
+          
+          const formData = new FormData(this);
+          const imageFile = document.getElementById('image').files[0];
+      
+          if (imageFile) {
+            const reader = new FileReader();
+            reader.onloadend = async function() {
+              formData.set('image', reader.result.split(',')[1]); // Send only Base64 data, no prefix
+    
+              const data = {};
+              formData.forEach((value, key) => {
+                if (data[key]) {
+                  if (Array.isArray(data[key])) {
+                    data[key].push(value);
+                  } else {
+                    data[key] = [data[key], value];
+                  }
+                } else {
+                  data[key] = value;
+                }
+              });
+      
+              try {
+                const response = await fetch('http://localhost:3000/profile/create', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(data),
+                });
+      
+                if (response.ok) {
+            alert('Profile created successfully!');
+            const responseData = await response.json();
+              console.log('Response:', responseData);
+    
+            if (data.userType === 'roommateSeekerWithRoom') {
+              window.location.href = '/room';
+            } else if (data.userType === 'roommateSeekerWithoutRoom') {
+              window.location.href = '/quessionaire';
+            }
+                } else {
+                  const errorData = await response.json();
+                  alert(`Error: ${errorData.msg || 'Unable to create profile'}`);
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+              }
+            };
+            reader.readAsDataURL(imageFile);
+          }
+          else {
+        alert('Please upload a profile picture.');
+      }
+        });
+
+        // Show other language input field
+        function toggleOtherLanguage(value) {
+            const otherInput = document.getElementById("other_language_input");
+            if (value === "Other") {
+                otherInput.style.display = "block";
+            } else {
+                otherInput.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
