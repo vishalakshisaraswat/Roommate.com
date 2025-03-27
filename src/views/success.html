@@ -25,11 +25,34 @@
     </div>
 
     <!-- Login Button (Hidden by default) -->
-    <a href="login-signup.html" id="loginButton" style="display: none;">
-        <button>Login</button>
+    <a id="loginButton" style="display: none;">
+        <button onclick="redirectToLogin()">Login</button>
     </a>
 
     <script>
+         function redirectToLogin() {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+            window.location.href = `login-signup.html?userId=${userId}`;
+        } else {
+            alert("User ID not found. Please try signing up again.");
+        }
+    }
+
+         // Function to get query parameters from URL
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // Extract userId from URL and store it in localStorage
+    const userId = getQueryParam("userId");
+    if (userId) {
+        localStorage.setItem("userId", userId);
+        console.log("UserId stored:", userId);
+    } else {
+        console.error("UserId not found in URL");
+    }  
         async function sendAadhaar() {
             const aadhaarInput = document.getElementById("aadhaarInput");
             const aadhaar = aadhaarInput.value.trim();
@@ -78,10 +101,15 @@
             }
 
             try {
+                const userId = localStorage.getItem("userId");
+                if (!userId) {
+                responseText.innerHTML = "<span style='color: red;'>User ID not found. Please try signing up again.</span>";
+                return;
+            }
                 const response = await fetch("http://localhost:3000/verifyOtp", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ aadhaar, otp }),
+                    body: JSON.stringify({ aadhaar, otp, userId }),
                 });
 
                 const data = await response.json();

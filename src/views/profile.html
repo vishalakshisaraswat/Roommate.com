@@ -8,6 +8,9 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif; 
+            background: url('../assets/r11.jpg') no-repeat center center fixed;
+            background-size: cover; 
+            display: flex;
             margin: 20px;
             background-color: #ADD8E6; 
         }
@@ -149,7 +152,15 @@
           
           const formData = new FormData(this);
           const imageFile = document.getElementById('image').files[0];
-      
+          const storedUserId = localStorage.getItem("userId");
+          
+          if (!storedUserId) {
+            alert("User ID not found! Please log in again.");
+            return;
+        }
+
+        formData.append('userId', storedUserId);
+
           if (imageFile) {
             const reader = new FileReader();
             reader.onloadend = async function() {

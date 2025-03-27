@@ -41,20 +41,25 @@ const upload = multer({
 
 router.post('/create', upload.array('photos', 4), async (req, res) => {
   try {
-    const { address, rent, description, availableSpacesForRoommates } = req.body;
+    const { address, rent, description, userId } = req.body;
 
-    if (!address || !rent || !availableSpacesForRoommates) {
+    if (!userId || !address || !rent ) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid User ID' });
     }
 
     const photos = req.files.map(file => file.buffer.toString('base64')); // Convert to Base64
 
     const newRoom = new Room({
       roomId: new mongoose.Types.ObjectId().toString(),
+      userId: new mongoose.Types.ObjectId(userId),
       address,
       rent,
       description,
-      availableSpacesForRoommates,
+
       photos, // Store Base64-encoded images
     });
 

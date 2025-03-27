@@ -4,10 +4,11 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const path = require('path');
 const { JWT_SECRET } = require('../middleware/authMiddleware'); // Ensure correct import
-
+const mongoose = require('mongoose'); 
 const router = express.Router();
 
 // Signup
+// Signup Route
 router.post('/signup', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -23,19 +24,22 @@ router.post('/signup', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ email, password: hashedPassword });
-    await newUser.save();
+    // Generate a unique userId (can use _id as userId)
+    const userId = new mongoose.Types.ObjectId();
+    const newUser = new User({
+      userId, // Assign userId
+      email,
+      password: hashedPassword
+    });
 
-    res.sendFile(path.join(__dirname, '../views/success.html'));
+    await newUser.save();
+    // res.sendFile(path.join(__dirname, '../views/success.html'));
+    console.log(`"Signup successful:" , newUser.userId`);
+    res.redirect(`/success.html?userId=${newUser.userId}`);
   } catch (err) {
     console.error("Signup Error:", err);
     res.status(500).json({ message: 'Error during signup', error: err.message });
   }
-});
-
-// Login Page
-router.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/login.html'));
 });
 
 // Login
@@ -77,8 +81,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
-// jjjjjjjjjjjjjjjjjjjjjjj
 
 //Login-signup Page
 router.get('/login-signup', (req, res) => {

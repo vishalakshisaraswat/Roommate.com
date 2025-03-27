@@ -42,6 +42,30 @@ connectDB();
 
 const users = {}; // Store connected users (socket.id -> username)
 
+const axios = require('axios'); // Ensure Axios is installed: npm install axios
+
+app.get('/recommendations/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Fetch user data from MongoDB
+        const user = await Profile.findById(userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        // Send user traits to Python API
+        const response = await axios.post('http://127.0.0.1:8000/recommend', {
+            user_traits: user.traits // Example: ["Night Owl", "Extrovert", "Non-smoker"]
+        });
+
+        // Return recommended roommates
+        res.json(response.data);
+    } catch (error) {
+        console.error("Error fetching recommendations:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
 // WebSocket connection
 io.on('connection', async (socket) => {
     console.log('User connected:', socket.id);
@@ -116,18 +140,21 @@ app.post('/sendAadhaar', async (req, res) => {
 
 app.post('/verifyOtp', (req, res) => {
     const { aadhaar, otp } = req.body;
+    const userId = req.body.userId || localStorage.getItem("userId");
 
-    if (!aadhaar || !otp) {
-        return res.status(400).json({ message: "Aadhaar and OTP are required." });
+    if (!aadhaar || !otp || !userId) {
+        return res.status(400).json({ message: "Missing required fields." });
     }
 
     if (otpStore[aadhaar] && otpStore[aadhaar].toString() === otp) {
         delete otpStore[aadhaar]; // Remove OTP after verification
-        res.status(200).json({ message: "OTP Verified Successfully" });
+        res.status(200).json({ message: "OTP Verified Successfully", userId });
     } else {
         res.status(401).json({ message: "Invalid OTP" });
     }
 });
+
+
 
 // Static files
 app.use(express.static(path.join(__dirname, 'views')));
@@ -140,7 +167,8 @@ app.get('/quessionaire', (req, res) => res.sendFile(path.join(__dirname, 'views'
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
 app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'views', 'chat.html')));
 app.get('/expenses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'expenses.html')));
-
+const recommendationRoutes = require('./routes/recommendationRoutes');
+app.use('/recommend', recommendationRoutes);
 // Routes
 app.use('/', userRoutes);
 app.use('/profile', profileRoutes);

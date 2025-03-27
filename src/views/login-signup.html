@@ -84,5 +84,45 @@
         <button type="submit">Login</button>
     </form>
     </div>
+    <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+    
+        // Extract userId from URL and store it in localStorage
+        const userId = getQueryParam("userId");
+        if (userId) {
+            localStorage.setItem("userId", userId);
+            console.log("UserId stored in login page:", userId);
+        } else {
+            console.error("UserId not found in URL on login page.");
+        }
+    
+        // Redirect to profile page if the user doesn't have a profile
+        async function checkUserProfile() {
+            const storedUserId = localStorage.getItem("userId");
+            if (!storedUserId) return;
+    
+            try {
+                const response = await fetch(`http://localhost:3000/profile/user/${storedUserId}`);
+                const profiles = await response.json();
+    
+                if (profiles.length === 0) {
+                    // No profile found, redirect to profile creation
+                    window.location.href = `profile.html?userId=${storedUserId}`;
+                } else {
+                    // Profile exists, redirect to homepage
+                    window.location.href = 'responses.html';
+                }
+            } catch (error) {
+                console.error("Error checking profile:", error);
+            }
+        }
+    
+        checkUserProfile();
+    </script>
+    
+    
 </body>
 </html>
