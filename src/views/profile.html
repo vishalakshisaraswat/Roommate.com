@@ -155,6 +155,15 @@
           event.preventDefault();
           
           const formData = new FormData(this);
+
+           // Collect all selected languages
+    const languages = [];
+    document.querySelectorAll('input[name="language"]:checked').forEach((checkbox) => {
+        languages.push(checkbox.value);
+    });
+
+    formData.set("languages", JSON.stringify(languages)); // Store as JSON array
+
           const imageFile = document.getElementById('image').files[0];
       
           if (imageFile) {
@@ -162,18 +171,28 @@
             reader.onloadend = async function() {
               formData.set('image', reader.result.split(',')[1]); // Send only Base64 data, no prefix
     
-              const data = {};
-              formData.forEach((value, key) => {
-                if (data[key]) {
-                  if (Array.isArray(data[key])) {
-                    data[key].push(value);
-                  } else {
-                    data[key] = [data[key], value];
-                  }
+              // const data = {};
+              // formData.forEach((value, key) => {
+              //   if (data[key]) {
+              //     if (Array.isArray(data[key])) {
+              //       data[key].push(value);
+              //     } else {
+              //       data[key] = [data[key], value];
+              //     }
+              //   } else {
+              //     data[key] = value;
+              //   }
+              // });
+
+               // Convert FormData to JSON
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key === "languages") {
+                    data[key] = JSON.parse(value); // Convert back to array
                 } else {
-                  data[key] = value;
+                    data[key] = value;
                 }
-              });
+            });
       
               try {
                 const response = await fetch('http://localhost:3000/profile/create', {
