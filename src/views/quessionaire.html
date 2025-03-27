@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
 
                 // Redirect to response.html
-                window.location.href = 'responses.html';
+                window.location.href = `responses.html?userId=${userId}`;
             } else {
                 alert(result.message || 'Error submitting form. Please try again.');
             }

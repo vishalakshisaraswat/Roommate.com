@@ -118,7 +118,7 @@
             <option value="Other">Other</option>
         </select>
         <input type="text" id="locationFilter" class="filter" placeholder="Location">
-        <!-- <select id="smokingFilter" class="filter">
+        <select id="smokingFilter" class="filter">
             <option value="">Smoking Preference</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -127,7 +127,7 @@
             <option value="">Alcohol Preference</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
-        </select> -->
+        </select>
         <button onclick="applyFilters()" class="filter">Apply Filters</button>
     </div>
 
@@ -136,52 +136,112 @@
     <div class="profiles-container" id="has-room"></div>
 
     <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const userId = sessionStorage.getItem("userId");
+
+  if (!userId) {
+    console.log("User ID not found");
+    return;
+  }
+
+  fetch(`/responses?userId=${userId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log("Fetched responses:", data);
+      // Process and display matched profiles
+    })
+    .catch(error => console.error("Error fetching responses:", error));
+});
+
+
         let profiles = []; // Store fetched profiles globally
 
         async function fetchProfiles() {
-            try {
-                const response = await fetch('/profile/responses'); // API endpoint
-                profiles = await response.json();
-                displayProfiles(profiles);
-            } catch (error) {
-                console.error('Error fetching profiles:', error);
-            }
+    try {
+        const userId = sessionStorage.getItem("userId");
+
+        if (!userId) {
+            console.error("User ID not found");
+            return;
         }
+
+        // Fetch general profiles
+        const profilesResponse = await fetch('/profile/all'); // Correct API for all profiles
+        let allProfiles = await profilesResponse.json();
+
+        // Fetch top matches
+        const matchesResponse = await fetch(`/match/${userId}`);
+        let matchedProfiles = await matchesResponse.json();
+
+        // Convert matchedProfiles into an object for quick lookup
+        let matchData = {};
+        matchedProfiles.forEach(match => {
+            matchData[match._id] = match.matchPercentage; 
+        });
+
+        // Add match percentage to profiles if available
+        allProfiles.forEach(profile => {
+            if (matchData[profile._id]) {
+                profile.matchPercentage = matchData[profile._id];
+            } else {
+                profile.matchPercentage = 0; // Default to 0% if not a match
+            }
+        });
+
+        // Sort profiles by match percentage in descending order
+        allProfiles.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+        profiles = allProfiles; // Store globally for filtering
+        displayProfiles(profiles);
+    } catch (error) {
+        console.error('Error fetching profiles or matches:', error);
+    }
+}
+
 
         function displayProfiles(data) {
-            const lookingForRoomContainer = document.getElementById('looking-for-room');
-            const hasRoomContainer = document.getElementById('has-room');
+    const lookingForRoomContainer = document.getElementById('looking-for-room');
+    const hasRoomContainer = document.getElementById('has-room');
 
-            lookingForRoomContainer.innerHTML = '';
-            hasRoomContainer.innerHTML = '';
+    lookingForRoomContainer.innerHTML = '';
+    hasRoomContainer.innerHTML = '';
 
-            data.forEach(entry => {
-                const imageSrc = entry.image || 'https://via.placeholder.com/250';
+    data.forEach(entry => {
+        const imageSrc = entry.image || 'https://via.placeholder.com/250';
 
-                const card = document.createElement('div');
-                card.className = 'profile-card';
-                card.innerHTML = `
-                    <img src="${imageSrc}" alt="Profile Picture">
-                    <div class="profile-content">
-                        <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                        <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
-                        <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                        
-                    </div>
-                `;
+        const card = document.createElement('div');
+        card.className = 'profile-card';
+        card.innerHTML = `
+            <img src="${imageSrc}" alt="Profile Picture">
+            <div class="profile-content">
+                <div class="profile-name">${entry.profileName || 'N/A'}</div>
+                <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
+                <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
+                <div class="match-percentage"><strong>Match:</strong> ${entry.matchPercentage || '0'}%</div>
+                <div class="profile-details">
+                    <strong>Pets:</strong> ${entry.pets} <br>
+                    <strong>Smoking:</strong> ${entry.smoking} <br>
+                    <strong>Alcohol:</strong> ${entry.alcohol} <br>
+                    <strong>Cleanliness:</strong> ${entry.cleanliness} <br>
+                </div>
+            </div>
+        `;
 
-                card.onclick = () => {
-                    sessionStorage.setItem('profileData', JSON.stringify(entry));
-                    window.location.href = 'profile-details.html';
-                };
+        card.onclick = () => {
+            sessionStorage.setItem('profileData', JSON.stringify(entry));
+            window.location.href = 'profile-details.html';
+        };
 
-                if (entry.hasRoom) {
-                    hasRoomContainer.appendChild(card);
-                } else {
-                    lookingForRoomContainer.appendChild(card);
-                }
-            });
+        if (entry.hasRoom) {
+            hasRoomContainer.appendChild(card);
+        } else {
+            lookingForRoomContainer.appendChild(card);
         }
+    });
+}
+
+
+        
 
         function applyFilters() {
             let filteredProfiles = profiles;
@@ -189,15 +249,15 @@
             const maxAge = document.getElementById('maxAge').value;
             const gender = document.getElementById('genderFilter').value;
             const location = document.getElementById('locationFilter').value.toLowerCase();
-            // const smoking = document.getElementById('smokingFilter').value;
-            // const alcohol = document.getElementById('alcoholFilter').value;
+            const smoking = document.getElementById('smokingFilter').value;
+            const alcohol = document.getElementById('alcoholFilter').value;
 
             if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
             if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
             if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
             if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
-            // if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
-            // if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
+            if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
+            if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
 
             displayProfiles(filteredProfiles);
         }
