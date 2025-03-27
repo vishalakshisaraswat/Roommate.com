@@ -7,6 +7,7 @@ const profileSchema = new mongoose.Schema({
   userType: { type: String, enum: ['roommateSeekerWithRoom', 'roommateSeekerWithoutRoom'], required: true },
   age: { type: Number, required: true },
   languages: { type: [String], required: true },
+  otherLanguage: { type: String },
   address: { type: String, required: true },
   description: { type: String },
   image: { type: Buffer }, // Change from String to Buffer

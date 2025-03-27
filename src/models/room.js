@@ -6,6 +6,7 @@ const roomSchema = new mongoose.Schema({
   address: { type: String, required: true },
   rent: { type: Number, required: true },
   description: { type: String },
+  // availableSpacesForRoommates: { type: Number, required: true },
   photos: [{ type: String }],
 }, { timestamps: true });
 

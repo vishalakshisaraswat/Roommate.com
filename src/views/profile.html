@@ -66,31 +66,38 @@
             });
         </script>
 
-        <h3>Which language are you comfortable with?</h3>
-        <select id="language_select" name="language" onchange="toggleOtherLanguage(this.value)">
-            <option value="" disabled selected>Select a language</option>
-            <option value="Hindi">Hindi</option>
-            <option value="English">English</option>
-            <option value="Tamil">Tamil</option>
-            <option value="Telugu">Telugu</option>
-            <option value="Kannada">Kannada</option>
-            <option value="Manipuri">Manipuri</option>
-            <option value="Maithili">Maithili</option>
-            <option value="Punjabi">Punjabi</option>
-            <option value="Odia">Odia</option>
-            <option value="Nepali">Nepali</option>
-            <option value="Marathi">Marathi</option>
-            <option value="Malayalam">Malayalam</option>
-            <option value="Konkani">Konkani</option>
-            <option value="Kashmiri">Kashmiri</option>
-            <option value="Assamese">Assamese</option>
-            <option value="Other">Other</option>
-        </select>
+        <h3>Which language(s) are you comfortable with?</h3>
+        <div id="language-options">
+            <label><input type="checkbox" name="language" value="Hindi"> Hindi</label><br>
+            <label><input type="checkbox" name="language" value="English"> English</label><br>
+            <label><input type="checkbox" name="language" value="Tamil"> Tamil</label><br>
+            <label><input type="checkbox" name="language" value="Telugu"> Telugu</label><br>
+            <label><input type="checkbox" name="language" value="Kannada"> Kannada</label><br>
+            <label><input type="checkbox" name="language" value="Manipuri"> Manipuri</label><br>
+            <label><input type="checkbox" name="language" value="Maithili"> Maithili</label><br>
+            <label><input type="checkbox" name="language" value="Punjabi"> Punjabi</label><br>
+            <label><input type="checkbox" name="language" value="Odia"> Odia</label><br>
+            <label><input type="checkbox" name="language" value="Nepali"> Nepali</label><br>
+            <label><input type="checkbox" name="language" value="Marathi"> Marathi</label><br>
+            <label><input type="checkbox" name="language" value="Malayalam"> Malayalam</label><br>
+            <label><input type="checkbox" name="language" value="Konkani"> Konkani</label><br>
+            <label><input type="checkbox" name="language" value="Kashmiri"> Kashmiri</label><br>
+            <label><input type="checkbox" name="language" value="Assamese"> Assamese</label><br>
+            <label><input type="checkbox" id="otherLanguageCheck" value="Other"> Other</label><br>
+        </div>
 
         <div id="other_language_input" style="display:none; margin-top: 10px;">
             <label for="other_language">Please specify:</label>
-            <textarea id="other_language" name="other_language" rows="2" cols="30"></textarea>
+            <textarea id="other_language" name="other_language" rows="2" cols="30" placeholder="Enter other languages here"></textarea>
         </div>
+        
+        <script>
+          document.getElementById('otherLanguageCheck').addEventListener('change', function() {
+              document.getElementById('other_language_input').style.display = this.checked ? 'block' : 'none';
+          });
+      </script>
+
+
 
         <label for="address"><h3>Address:</h3></label>
         <input type="text" id="address" name="address" required>
@@ -151,6 +158,15 @@
           event.preventDefault();
           
           const formData = new FormData(this);
+
+           // Collect all selected languages
+    const languages = [];
+    document.querySelectorAll('input[name="language"]:checked').forEach((checkbox) => {
+        languages.push(checkbox.value);
+    });
+
+    formData.set("languages", JSON.stringify(languages)); // Store as JSON array
+
           const imageFile = document.getElementById('image').files[0];
           const storedUserId = localStorage.getItem("userId");
           console.log("Retrieved userId from localStorage:", storedUserId);
@@ -167,18 +183,28 @@
             reader.onloadend = async function() {
               formData.set('image', reader.result.split(',')[1]); // Send only Base64 data, no prefix
     
-              const data = {};
-              formData.forEach((value, key) => {
-                if (data[key]) {
-                  if (Array.isArray(data[key])) {
-                    data[key].push(value);
-                  } else {
-                    data[key] = [data[key], value];
-                  }
+              // const data = {};
+              // formData.forEach((value, key) => {
+              //   if (data[key]) {
+              //     if (Array.isArray(data[key])) {
+              //       data[key].push(value);
+              //     } else {
+              //       data[key] = [data[key], value];
+              //     }
+              //   } else {
+              //     data[key] = value;
+              //   }
+              // });
+
+               // Convert FormData to JSON
+            const data = {};
+            formData.forEach((value, key) => {
+                if (key === "languages") {
+                    data[key] = JSON.parse(value); // Convert back to array
                 } else {
-                  data[key] = value;
+                    data[key] = value;
                 }
-              });
+            });
       
               try {
                 const response = await fetch('http://localhost:3000/profile/create', {

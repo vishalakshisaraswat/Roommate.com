@@ -6,11 +6,11 @@
     <title>Expense Splitter</title>
     <link rel="stylesheet" href="stylesExpense.css">
     <script>
-        let owed = { user1: 0, user2: 0 };
+        let owed = { roommate1: 0, roommate2: 0 };
         let transactions = [];
 
         async function addExpense() {
-            let user = document.getElementById("user").value;
+            let roommate = document.getElementById("roommate").value;
             let amount = parseFloat(document.getElementById("amount").value);
             
             if (isNaN(amount) || amount <= 0) {
@@ -19,24 +19,24 @@
             }
             
             let splitAmount = amount / 2;
-            let otherUser = user === "user1" ? "user2" : "user1";
+            let otherroommate = roommate === "roommate1" ? "roommate2" : "roommate1";
 
-            owed[otherUser] += splitAmount;
+            owed[otherroommate] += splitAmount;
 
-            let minOwed = Math.min(owed.user1, owed.user2);
-            owed.user1 -= minOwed;
-            owed.user2 -= minOwed;
+            let minOwed = Math.min(owed.roommate1, owed.roommate2);
+            owed.roommate1 -= minOwed;
+            owed.roommate2 -= minOwed;
 
             let timestamp = new Date().toLocaleString();
-            transactions.push({ timestamp, user, amount, type: "expense" });
+            transactions.push({ timestamp, roommate, amount, type: "expense" });
             
-            await saveTransaction(user, amount, "expense");
+            await saveTransaction(roommate, amount, "expense");
             updateDisplay();
             document.getElementById("amount").value = "";
         }
 
         async function payBack() {
-            let user = document.getElementById("user").value;
+            let roommate = document.getElementById("roommate").value;
             let amount = parseFloat(document.getElementById("amount").value);
             
             if (isNaN(amount) || amount <= 0) {
@@ -44,31 +44,31 @@
                 return;
             }
 
-            let otherUser = user === "user1" ? "user2" : "user1";
+            let otherroommate = roommate === "roommate1" ? "roommate2" : "roommate1";
 
-            if (amount > Math.abs(owed[user])) {
-                alert(`${user} cannot pay back more than they owe.`);
+            if (amount > Math.abs(owed[roommate])) {
+                alert(`${roommate} cannot pay back more than they owe.`);
                  return;
             }
 
 
-            owed[user] -= amount;
-            owed[otherUser] -= amount;
+            owed[roommate] -= amount;
+            owed[otherroommate] -= amount;
 
             let timestamp = new Date().toLocaleString();
-            transactions.push({ timestamp, user, amount, type: "payback" });
+            transactions.push({ timestamp, roommate, amount, type: "payback" });
             
-            await saveTransaction(user, amount, "payback");
+            await saveTransaction(roommate, amount, "payback");
             updateDisplay();
             document.getElementById("amount").value = "";
         }
 
-        async function saveTransaction(user, amount, type) {
+        async function saveTransaction(roommate, amount, type) {
     try {
         const response = await fetch("http://localhost:3000/expense", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user, amount, type }),
+            body: JSON.stringify({ roommate, amount, type }),
         });
 
         const data = await response.json();
@@ -92,14 +92,14 @@
     }
 
         function updateDisplay() {
-            document.getElementById("owed1").textContent = Math.max(owed.user1, 0).toFixed(2);
-            document.getElementById("owed2").textContent = Math.max(owed.user2, 0).toFixed(2);
+            document.getElementById("owed1").textContent = Math.max(owed.roommate1, 0).toFixed(2);
+            document.getElementById("owed2").textContent = Math.max(owed.roommate2, 0).toFixed(2);
             
             let historyList = document.getElementById("history");
             historyList.innerHTML = "";
             transactions.forEach(transaction => {
                 let li = document.createElement("li");
-                li.textContent = `${transaction.timestamp} - ${transaction.user} ${transaction.type} ₹${transaction.amount.toFixed(2)}`;
+                li.textContent = `${transaction.timestamp} - ${transaction.roommate} ${transaction.type} ₹${transaction.amount.toFixed(2)}`;
                 historyList.appendChild(li);
             });
         }
@@ -109,10 +109,10 @@
 </head>
 <body>
     <h1>Expense Splitter</h1>
-    <label for="user">Select User:</label>
-    <select id="user">
-        <option value="user1">User 1</option>
-        <option value="user2">User 2</option>
+    <label for="roommate">Select roommate:</label>
+    <select id="roommate">
+        <option value="roommate1">roommate 1</option>
+        <option value="roommate2">roommate 2</option>
     </select>
     <br>
     <label for="amount">Enter Amount:</label>
@@ -121,8 +121,8 @@
     <button onclick="payBack()">Pay Back</button>
     
     <h2>Amounts Owed</h2>
-    <p>User 1 Owes: <span id="owed1">0.00</span></p>
-    <p>User 2 Owes: <span id="owed2">0.00</span></p>
+    <p>roommate 1 Owes: <span id="owed1">0.00</span></p>
+    <p>roommate 2 Owes: <span id="owed2">0.00</span></p>
     
     <h2>Transaction History</h2>
     <ul id="history"></ul>

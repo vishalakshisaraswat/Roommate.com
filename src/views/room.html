@@ -114,6 +114,21 @@
                 <input type="number" id="rent" name="rent" placeholder="Enter rent amount (₹)" " step="100" required>
                 <p style="font-size: 12px; color: #555;">Enter rent.</p>
 
+                <script>
+                    document.getElementById('rent').addEventListener('input', function () {
+                        if (this.value < 1) {
+                            alert('Enter accurate amount.');
+                            this.value = '';
+                        }
+                    });
+                </script>
+
+                <!-- <label for="availableSpacesForRoommates"><h3>Select available spaces for roommates:</h3></label>
+                <select id="availableSpacesForRoommates" name="availableSpacesForRoommates" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select> -->
 
                 <label for="description"><h3>Describe your room:</h3></label>
                 <textarea id="description" name="description" rows="3" placeholder="Enter the description here (like how many beds are there, washroom is personal or shared)..."></textarea>

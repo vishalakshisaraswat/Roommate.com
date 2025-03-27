@@ -65,21 +65,20 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, // Fixed `userId` field
+      { userId: user._id, email: user.email }, 
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send token in response (optional)
-    // res.json({ message: 'Login successful', token });
-    // res.redirect('/profile.html');
-    // Redirect (if using frontend routing)
-    res.sendFile(path.join(__dirname, '../views/responses.html'));
+    // ✅ Send JSON response instead of sending a file
+    res.json({ message: "Login successful", token, redirect: "/responses.html" });
+
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: 'Error during login', error: err.message });
   }
 });
+
 
 
 //Login-signup Page
@@ -110,16 +109,14 @@ router.post('/login-signup', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, // Fixed `userId` field
+      { userId: user._id, email: user.email }, 
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send token in response (optional)
-    // res.json({ message: 'Login successful', token });
-    // res.redirect('/profile.html');
-    // Redirect (if using frontend routing)
-    res.sendFile(path.join(__dirname, '../views/profile.html'));
+    // Send JSON response instead of redirecting to an HTML file
+    res.json({ message: 'Login successful', token, redirect: '/profile.html' });
+
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: 'Error during login', error: err.message });
