@@ -153,7 +153,8 @@
           const formData = new FormData(this);
           const imageFile = document.getElementById('image').files[0];
           const storedUserId = localStorage.getItem("userId");
-          
+          console.log("Retrieved userId from localStorage:", storedUserId);
+
           if (!storedUserId) {
             alert("User ID not found! Please log in again.");
             return;
@@ -192,10 +193,11 @@
               console.log('Response:', responseData);
     
             if (data.userType === 'roommateSeekerWithRoom') {
-              window.location.href = '/room';
-            } else if (data.userType === 'roommateSeekerWithoutRoom') {
-              window.location.href = '/quessionaire';
-            }
+    window.location.href = `/room?userId=${storedUserId}`;
+} else if (data.userType === 'roommateSeekerWithoutRoom') {
+    window.location.href = `/quessionaire?userId=${storedUserId}`;
+}
+
                 } else {
                   const errorData = await response.json();
                   alert(`Error: ${errorData.msg || 'Unable to create profile'}`);

@@ -140,7 +140,7 @@
 
         async function fetchProfiles() {
             try {
-                const response = await fetch('/profile/all'); // API endpoint
+                const response = await fetch('/profile/responses'); // API endpoint
                 profiles = await response.json();
                 displayProfiles(profiles);
             } catch (error) {

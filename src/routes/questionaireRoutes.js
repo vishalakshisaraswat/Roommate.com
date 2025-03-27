@@ -2,13 +2,32 @@ const path = require('path');
 const express = require("express");
 const router = express.Router();
 const Questionnaire = require("../models/questionaire.js");
+const Profile = require("../models/profile.js"); 
+const mongoose = require('mongoose');
 
 router.post('/submit-form', async (req, res) => {
     try {
         console.log("Received Data:", req.body); // Debugging
+        const { userId } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
 
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid User ID" });
+        }
+        const userProfile = await Profile.findOne({ userId });
+        if (!userProfile) {
+            return res.status(404).json({ message: "User profile not found" });
+        }
+
+
+        // Check if the userId exists in the Profile collection
+      
         // Normalize field names to match schema
         let formattedData = {
+            userId,
             genderPreference: req.body['gender-preference'],
             ageGroup: req.body['age-group'],
             sleepingSchedule: req.body['sleeping-schedule'],
@@ -53,6 +72,10 @@ router.get("/:userID", async (req, res) => {
         const { userID } = req.params;
         const questionnaire = await Questionnaire.findOne({ userID });
         
+        if (!mongoose.Types.ObjectId.isValid(userID)) {
+            return res.status(400).json({ message: "Invalid User ID" });
+        }
+
         if (!questionnaire) {
             return res.status(404).json({ message: "No questionnaire found for this user" });
         }
