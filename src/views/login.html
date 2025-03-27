@@ -87,30 +87,31 @@
 
     <script>
         document.getElementById("loginForm").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Stop form from reloading
-    
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-    
-            try {
-                const response = await fetch("/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                });
-    
-                const data = await response.json(); // Ensure response is JSON
-    
-                if (!response.ok) {
-                    alert(data.message); // Show the error alert
-                } else {
-                    alert("Login successful!");
-                    window.location.href = "/dashboard";
-                }
-            } catch (error) {
-                alert("An error occurred. Please try again.");
-            }
+    event.preventDefault(); // Stop page reload
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
         });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message); // Show error message
+        } else {
+            alert("Login successful!"); // Show success alert
+            window.location.href = data.redirect; // ✅ Redirect to /responses.html
+        }
+    } catch (error) {
+        alert("An error occurred. Please try again.");
+    }
+});
+
     </script>
     
 </body>
