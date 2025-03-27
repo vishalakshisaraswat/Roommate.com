@@ -181,8 +181,20 @@ router.get('/responses', async (req, res) => {
         languages: profile.languages,
         address: profile.address,
         description: profile.description,
+        // Convert image to Base64 (if available)
         image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
-        matchPercentage: matchPercentage.toFixed(2)
+
+        // Questionaire Fields
+        genderPreference: matchingResponse?.genderPreference || 'N/A',
+        roomBudget: matchingResponse?.roomBudget || 'N/A',
+        accommodationType: matchingResponse?.accommodationType || 'N/A',
+        pets: matchingResponse?.pets || 'N/A',
+        smoking: matchingResponse?.smoking || 'N/A',
+        alcohol: matchingResponse?.alcohol || 'N/A',
+        cleanliness: matchingResponse?.cleanliness || 'N/A',
+        quietEnvironment: matchingResponse?.quietEnvironment || 'N/A',
+        entertainGuests: matchingResponse?.entertainGuests || 'N/A',
+        matchPercentage: matchPercentage.toFixed(2) // Round to 2 decimal places
       };
     }).filter(Boolean);
 
