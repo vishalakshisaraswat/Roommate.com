@@ -147,7 +147,7 @@ router.get('/responses', async (req, res) => {
         address: profile.address,
         description: profile.description,
         // Convert image to Base64 (if available)
-        image: profile.image ? `data:image/png;base64,${profile.image}` : null,
+        image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
 
         // Questionaire Fields
         genderPreference: matchingResponse?.genderPreference || 'N/A',
