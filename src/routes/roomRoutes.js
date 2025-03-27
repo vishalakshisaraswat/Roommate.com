@@ -41,9 +41,9 @@ const upload = multer({
 
 router.post('/create', upload.array('photos', 4), async (req, res) => {
   try {
-    const { address, rent, description, availableSpacesForRoommates } = req.body;
+    const { address, rent, description } = req.body;
 
-    if (!address || !rent || !availableSpacesForRoommates) {
+    if (!address || !rent) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -54,7 +54,6 @@ router.post('/create', upload.array('photos', 4), async (req, res) => {
       address,
       rent,
       description,
-      availableSpacesForRoommates,
       photos, // Store Base64-encoded images
     });
 

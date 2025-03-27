@@ -76,6 +76,7 @@
                 <label><h2>What is your budget range for renting a room?</h2></label>
                 <textarea name="room-budget" placeholder="Enter your budget range here..." rows="3" cols="40"></textarea>
             </div>
+            
             <div class="question">
                 <label><h2>What type of accommodation are you looking for?</h2></label>
                 <label><input type="radio" name="accommodation-type" value="apartment"> Apartment</label>
@@ -85,36 +86,33 @@
             </div>
             
             
-            
-            
-            
+            <!-- Language Selection -->
             <div class="question">
-                <label><h2>Which language are you comfortable with?</h2></label>
-                <select id="language_select" name="language" onchange="toggleOtherLanguage(this.value)">
-                    <option value="" disabled selected>Select a language</option>
-                    <option value="Hindi">Hindi</option>
-                    <option value="English">English</option>
-                    <option value="Tamil">Tamil</option>
-                    <option value="Telugu">Telugu</option>
-                    <option value="Kannada">Kannada</option>
-                    <option value="Manipuri">Manipuri</option>
-                    <option value="Maithili">Maithili</option>
-                    <option value="Punjabi">Punjabi</option>
-                    <option value="Odia">Odia</option>
-                    <option value="Nepali">Nepali</option>
-                    <option value="Marathi">Marathi</option>
-                    <option value="Malayalam">Malayalam</option>
-                    <option value="Konkani">Konkani</option>
-                    <option value="Kashmiri">Kashmiri</option>
-                    <option value="Assamese">Assamese</option>
-                    <option value="Other">Other</option>
-                </select>
-            
+                <label><h2>Which languages are you comfortable with?</h2></label>
+                <div id="language-options">
+                    <label><input type="checkbox" name="language" value="Hindi"> Hindi</label>
+                    <label><input type="checkbox" name="language" value="English"> English</label>
+                    <label><input type="checkbox" name="language" value="Tamil"> Tamil</label>
+                    <label><input type="checkbox" name="language" value="Telugu"> Telugu</label>
+                    <label><input type="checkbox" name="language" value="Kannada"> Kannada</label>
+                    <label><input type="checkbox" name="language" value="Manipuri"> Manipuri</label>
+                    <label><input type="checkbox" name="language" value="Maithili"> Maithili</label>
+                    <label><input type="checkbox" name="language" value="Punjabi"> Punjabi</label>
+                    <label><input type="checkbox" name="language" value="Odia"> Odia</label>
+                    <label><input type="checkbox" name="language" value="Nepali"> Nepali</label>
+                    <label><input type="checkbox" name="language" value="Marathi"> Marathi</label>
+                    <label><input type="checkbox" name="language" value="Malayalam"> Malayalam</label>
+                    <label><input type="checkbox" name="language" value="Konkani"> Konkani</label>
+                    <label><input type="checkbox" name="language" value="Kashmiri"> Kashmiri</label>
+                    <label><input type="checkbox" name="language" value="Assamese"> Assamese</label>
+                    <label><input type="checkbox" name="language" value="Other" onclick="toggleOtherLanguage(this)"> Other</label>
+                </div>
                 <div id="other_language_input" style="display:none; margin-top: 10px;">
                     <label for="other_language">Please specify:</label>
                     <textarea id="other_language" name="other_language" rows="2" cols="30" placeholder="Enter other languages here"></textarea>
                 </div>
             </div>
+             
           
             <div class="question">
                 <label><h2>Are you comfortable sharing a room with a smoker?</h2></label>
@@ -270,7 +268,16 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         otherInput.style.display = "none";
     }
-    }   
+    }  
+    
+    function toggleOtherLanguage(checkbox) {
+            const otherInput = document.getElementById("other_language_input");
+            if (checkbox.checked) {
+                otherInput.style.display = "block";
+            } else {
+                otherInput.style.display = "none";
+            }
+        }
 
     </script>
 </body>

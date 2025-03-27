@@ -12,6 +12,7 @@ const questionnaireSchema = new mongoose.Schema({
     roomBudget: String,
     accommodationType: String,
     language: [String],
+    otherLanguage: { type: String },
     smoking: String,
     alcohol: String,
     cleanliness: String,
