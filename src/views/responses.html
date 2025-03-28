@@ -136,65 +136,49 @@
     <div class="profiles-container" id="has-room"></div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const userId = sessionStorage.getItem("userId");
+document.addEventListener("DOMContentLoaded", function () {
+    // Extract userId from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    let userId = urlParams.get("userId");
 
-  if (!userId) {
-    console.log("User ID not found");
-    return;
-  }
+    if (userId) {
+        sessionStorage.setItem("userId", userId); // Store userId in session storage
+    } else {
+        userId = sessionStorage.getItem("userId"); // Fallback to session storage if missing
+    }
 
-  fetch(`/responses?userId=${userId}`)
-    .then(response => response.json())
-    .then(data => {
-      console.log("Fetched responses:", data);
-      // Process and display matched profiles
-    })
-    .catch(error => console.error("Error fetching responses:", error));
+    if (!userId) {
+        console.log("User ID not found");
+        return;
+    }
+
+    // Fetch responses using userId
+    fetch(`/responses?userId=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched responses:", data);
+            // Process and display matched profiles
+        })
+        .catch(error => console.error("Error fetching responses:", error));
+
+    // Update Chat link to include userId dynamically
+    const chatLink = document.querySelector('.nav-links a[href="chat.html"]');
+    if (chatLink) {
+        chatLink.href = `chat.html?userId=${userId}`;
+    }
 });
+
 
 
         let profiles = []; // Store fetched profiles globally
 
         async function fetchProfiles() {
     try {
-        const userId = sessionStorage.getItem("userId");
-
-        if (!userId) {
-            console.error("User ID not found");
-            return;
-        }
-
-        // Fetch general profiles
-        const profilesResponse = await fetch('/profile/all'); // Correct API for all profiles
-        let allProfiles = await profilesResponse.json();
-
-        // Fetch top matches
-        const matchesResponse = await fetch(`/match/${userId}`);
-        let matchedProfiles = await matchesResponse.json();
-
-        // Convert matchedProfiles into an object for quick lookup
-        let matchData = {};
-        matchedProfiles.forEach(match => {
-            matchData[match._id] = match.matchPercentage; 
-        });
-
-        // Add match percentage to profiles if available
-        allProfiles.forEach(profile => {
-            if (matchData[profile._id]) {
-                profile.matchPercentage = matchData[profile._id];
-            } else {
-                profile.matchPercentage = 0; // Default to 0% if not a match
-            }
-        });
-
-        // Sort profiles by match percentage in descending order
-        allProfiles.sort((a, b) => b.matchPercentage - a.matchPercentage);
-
-        profiles = allProfiles; // Store globally for filtering
+        const response = await fetch('/profile/all');
+        const profiles = await response.json();
         displayProfiles(profiles);
     } catch (error) {
-        console.error('Error fetching profiles or matches:', error);
+        console.error('Error fetching profiles:', error);
     }
 }
 
@@ -217,13 +201,7 @@
                 <div class="profile-name">${entry.profileName || 'N/A'}</div>
                 <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
                 <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                <div class="match-percentage"><strong>Match:</strong> ${entry.matchPercentage || '0'}%</div>
-                <div class="profile-details">
-                    <strong>Pets:</strong> ${entry.pets} <br>
-                    <strong>Smoking:</strong> ${entry.smoking} <br>
-                    <strong>Alcohol:</strong> ${entry.alcohol} <br>
-                    <strong>Cleanliness:</strong> ${entry.cleanliness} <br>
-                </div>
+            
             </div>
         `;
 
