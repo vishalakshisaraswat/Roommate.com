@@ -72,11 +72,7 @@
                 <textarea id="specific-address" name="specific_address" rows="4" placeholder="Enter your preferred location or neighborhood"></textarea>
             </div>
             
-            <div class="question">
-                <label><h2>What is your budget range for renting a room?</h2></label>
-                <textarea name="room-budget" placeholder="Enter your budget range here..." rows="3" cols="40"></textarea>
-            </div> -->
-
+        
             <div class="question">
                 <label><h2>What is your budget range for renting a room?</h2></label>
                 <input type="number" name="room-budget" placeholder="Enter your budget here..." min="500" required>
@@ -91,13 +87,6 @@
                
             </div>
             
-            <div class="question">
-                <label><h2>What type of accommodation are you looking for?</h2></label>
-                <label><input type="radio" name="accommodation-type" value="apartment"> Apartment</label>
-                <label><input type="radio" name="accommodation-type" value="villa"> Villa</label>
-                <label><input type="radio" name="accommodation-type" value="studio"> Studio</label>
-               
-            </div>
             
             
             <!-- Language Selection -->
@@ -276,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
 
                 // Redirect to response.html
-                window.location.href = 'responses.html';
+                window.location.href = `responses.html?userId=${userId}`;
             } else {
                 alert(result.message || 'Error submitting form. Please try again.');
             }

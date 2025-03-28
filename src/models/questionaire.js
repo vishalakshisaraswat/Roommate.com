@@ -10,7 +10,7 @@ const questionnaireSchema = new mongoose.Schema({
     socialStyle: String,
     locationPreference: String,
     specificAddress: String,
-    // roomBudget: String,
+
     roomBudget: { type: Number, min: 500 }, 
     accommodationType: String,
     language: [String],
