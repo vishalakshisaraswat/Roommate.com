@@ -85,73 +85,76 @@
         </form>
     </div>
     <script>
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
-    
-        // Extract userId from URL and store it in localStorage
-        const userId = getQueryParam("userId");
-        if (userId) {
-            localStorage.setItem("userId", userId);
-            console.log("UserId stored in login page:", userId);
+    function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+// Extract userId from URL (if available) and store it
+const userId = getQueryParam("userId");
+if (userId) {
+    localStorage.setItem("userId", userId);
+    console.log("UserId stored from URL:", userId);
+}
+
+// Function to check if the user has a profile
+async function checkUserProfile() {
+    const storedUserId = localStorage.getItem("userId");
+    if (!storedUserId) return; // Exit if no userId
+
+    try {
+        const response = await fetch(`http://localhost:3000/profile/user/${storedUserId}`);
+        const profiles = await response.json();
+
+        if (profiles.length === 0) {
+            // No profile exists → Redirect to profile creation
+            window.location.href = `profile.html?userId=${storedUserId}`;
         } else {
-            console.error("UserId not found in URL on login page.");
+            // Profile exists → Redirect to homepage
+            window.location.href = 'responses.html';
         }
-    
-        // Redirect to profile page if the user doesn't have a profile
-        async function checkUserProfile() {
-            const storedUserId = localStorage.getItem("userId");
-            if (!storedUserId) return;
-    
-            try {
-                const response = await fetch(`http://localhost:3000/profile/user/${storedUserId}`);
-                const profiles = await response.json();
-    
-                if (profiles.length === 0) {
-                    // No profile found, redirect to profile creation
-                    window.location.href = `profile.html?userId=${storedUserId}`;
-                } else {
-                    // Profile exists, redirect to homepage
-                    window.location.href = 'responses.html';
-                }
-            } catch (error) {
-                console.error("Error checking profile:", error);
-            }
-        }
-    
-        checkUserProfile();
-    </script>
-    
-    
+    } catch (error) {
+        console.error("Error checking profile:", error);
+    }
+}
 
-    <script>
-        document.getElementById("loginForm").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Prevent form from reloading the page
+// Handle login form submission
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Prevent form from refreshing the page
 
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-            try {
-                const response = await fetch("/login-signup", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                });
-
-                const data = await response.json(); // Ensure response is JSON
-
-                if (!response.ok) {
-                    alert(data.message); // Show error message as an alert
-                } else {
-                    alert("Login successful!"); // Show success message
-                    window.location.href = data.redirect;  // Redirect if login is successful
-                }
-            } catch (error) {
-                alert("An error occurred. Please try again.");
-            }
+    try {
+        const response = await fetch("/login-signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
         });
-    </script>
+
+        const data = await response.json(); // Parse response JSON
+
+        if (!response.ok) {
+            alert(data.message); // Show error message
+        } else {
+            alert("Login successful!");
+
+            // Store userId & token in localStorage
+            if (data.userId) localStorage.setItem("userId", data.userId);
+            if (data.token) localStorage.setItem("token", data.token);
+
+            console.log("Redirecting to:", data.redirect);
+
+            // Run profile check **after** login is successful
+            checkUserProfile();
+        }
+    } catch (error) {
+        alert("An error occurred. Please try again.");
+        console.error("Login Error:", error);
+    }
+});
+
+</script>
 </html>
 </body>
 </html>
