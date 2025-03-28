@@ -58,13 +58,38 @@ router.post('/create', async (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     const profiles = await Profile.find();
+    const questionnaires = await Questionnaire.find();
 
-    const profilesWithImages = profiles.map(profile => ({
-      ...profile.toObject(),
-      image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
-    }));
+    const getValue = (obj, key) => obj[key] || 'N/A';
 
-    res.json(profilesWithImages);
+    const mergedData = profiles.map(profile => {
+      const profileQuestionnaire = questionnaires.find(q => q.userId.toString() === profile.userId.toString());
+
+      return {
+        userId: profile.userId,
+        profileName: profile.profileName,
+        gender: profile.gender,
+        age: profile.age,
+        userType: profile.userType,
+        languages: profile.languages,
+        address: profile.address,
+        description: profile.description,
+        image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
+
+        // Questionnaire Fields (if available)
+        genderPreference: getValue(profileQuestionnaire, 'genderPreference'),
+        roomBudget: getValue(profileQuestionnaire, 'roomBudget'),
+        accommodationType: getValue(profileQuestionnaire, 'accommodationType'),
+        pets: getValue(profileQuestionnaire, 'pets'),
+        smoking: getValue(profileQuestionnaire, 'smoking'),
+        alcohol: getValue(profileQuestionnaire, 'alcohol'),
+        cleanliness: getValue(profileQuestionnaire, 'cleanliness'),
+        quietEnvironment: getValue(profileQuestionnaire, 'quietEnvironment'),
+        entertainGuests: getValue(profileQuestionnaire, 'entertainGuests')
+      };
+    });
+
+    res.json(mergedData);
   } catch (error) {
     console.error('Error fetching profiles:', error);
     res.status(500).json({ message: 'Error fetching profiles' });
