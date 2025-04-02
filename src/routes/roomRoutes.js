@@ -36,20 +36,7 @@ router.post('/create', upload.array('photos', 4), async (req, res) => {
       return res.status(400).json({ message: 'All required fields must be provided' });
     }
 
-    // Convert internetAccess and parking to Boolean values
-    const internetAccessBoolean = internetAccess === "true";
-    const parkingBoolean = parking === "true";
-
-    // Convert amenities to Boolean values
-    const amenities = {
-      ac: ac === "true",
-      heater: heater === "true",
-      balcony: balcony === "true",
-      kitchen: kitchen === "true"
-    };
-
-    // Convert uploaded photos to Base64
-    const photos = req.files.map(file => file.buffer.toString('base64'));
+    const photos = req.files.map(file => file.buffer.toString('base64')); // Convert to Base64
 
     const newRoom = new Room({
       roomId: new mongoose.Types.ObjectId().toString(),

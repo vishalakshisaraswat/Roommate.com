@@ -67,10 +67,20 @@
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById("roomForm");
 
+            
+
             form.addEventListener("submit", async function (event) {
                 event.preventDefault(); // Prevent default form submission
 
                 const formData = new FormData(form);
+                const storedUserId = localStorage.getItem("userId");
+
+            if (!storedUserId) {
+                alert("User ID not found! Please log in again.");
+                return;
+            }
+
+            formData.append('userId', storedUserId);
 
                 try {
                     const response = await fetch("/room/create", {

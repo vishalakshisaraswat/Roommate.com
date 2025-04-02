@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 
 const questionnaireSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', required: true }, // Foreign key to Profile
     genderPreference: String,
     ageGroup: String,
     sleepingSchedule: String,
@@ -9,7 +10,7 @@ const questionnaireSchema = new mongoose.Schema({
     socialStyle: String,
     locationPreference: String,
     specificAddress: String,
-    // roomBudget: String,
+
     roomBudget: { type: Number, min: 500 }, 
     accommodationType: String,
     language: [String],

@@ -8,6 +8,9 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif; 
+            background: url('../assets/r11.jpg') no-repeat center center fixed;
+            background-size: cover; 
+            display: flex;
             margin: 20px;
             background-color: #ADD8E6; 
         }
@@ -165,7 +168,16 @@
     formData.set("languages", JSON.stringify(languages)); // Store as JSON array
 
           const imageFile = document.getElementById('image').files[0];
-      
+          const storedUserId = localStorage.getItem("userId");
+          console.log("Retrieved userId from localStorage:", storedUserId);
+
+          if (!storedUserId) {
+            alert("User ID not found! Please log in again.");
+            return;
+        }
+
+        formData.append('userId', storedUserId);
+
           if (imageFile) {
             const reader = new FileReader();
             reader.onloadend = async function() {
@@ -207,10 +219,11 @@
               console.log('Response:', responseData);
     
             if (data.userType === 'roommateSeekerWithRoom') {
-              window.location.href = '/room';
-            } else if (data.userType === 'roommateSeekerWithoutRoom') {
-              window.location.href = '/quessionaire';
-            }
+    window.location.href = `/room?userId=${storedUserId}`;
+} else if (data.userType === 'roommateSeekerWithoutRoom') {
+    window.location.href = `/quessionaire?userId=${storedUserId}`;
+}
+
                 } else {
                   const errorData = await response.json();
                   alert(`Error: ${errorData.msg || 'Unable to create profile'}`);

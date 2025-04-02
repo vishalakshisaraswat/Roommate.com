@@ -72,11 +72,7 @@
                 <textarea id="specific-address" name="specific_address" rows="4" placeholder="Enter your preferred location or neighborhood"></textarea>
             </div>
             
-            <!-- <div class="question">
-                <label><h2>What is your budget range for renting a room?</h2></label>
-                <textarea name="room-budget" placeholder="Enter your budget range here..." rows="3" cols="40"></textarea>
-            </div> -->
-
+        
             <div class="question">
                 <label><h2>What is your budget range for renting a room?</h2></label>
                 <input type="number" name="room-budget" placeholder="Enter your budget here..." min="500" required>
@@ -90,6 +86,7 @@
                 <label><input type="radio" name="accommodation-type" value="studio"> Studio</label>
                
             </div>
+            
             
             
             <!-- Language Selection -->
@@ -199,11 +196,27 @@
         </form>
     </div>
     <script>
+
+        
+    function getUserIdFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("userId");
+}
+
+const userId = getUserIdFromURL();
+if (userId) {
+    console.log("Extracted userId:", userId);
+    localStorage.setItem("userId", userId);  // Store for later use
+} else {
+    console.warn("No userId found in URL");
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM fully loaded"); // Debugging log
 
     const form = document.getElementById('questionaire-form');
-    
+    const userId = localStorage.getItem("userId");
+
     if (!form) {
         console.error("Form not found! Check if 'id=\"questionaire-form\"' exists in your HTML.");
         return;
@@ -228,6 +241,15 @@ document.addEventListener("DOMContentLoaded", function () {
             } 
         });
 
+        if (userId) {
+            data.userId = userId;
+        } else {
+            console.error("User ID not found. Ensure it is passed in the URL.");
+            alert("User ID is missing. Try again.");
+            return;
+        }
+
+
         console.log("Submitting form data:", data); // Debugging log
 
         // Send data to backend via POST request
@@ -243,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
 
                 // Redirect to response.html
-                window.location.href = 'responses.html';
+                window.location.href = `responses.html?userId=${userId}`;
             } else {
                 alert(result.message || 'Error submitting form. Please try again.');
             }
@@ -275,6 +297,7 @@ document.addEventListener("DOMContentLoaded", function () {
         otherInput.style.display = "none";
     }
     }  
+    
     
     function toggleOtherLanguage(checkbox) {
             const otherInput = document.getElementById("other_language_input");

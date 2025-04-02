@@ -33,12 +33,6 @@
         color: #333;
     }
 
-    p {
-        font-size: 14px;
-        color: #555;
-        margin-top: 5px;
-    }
-
     form {
         margin-top: 20px;   
     }
@@ -68,7 +62,6 @@
     button:hover {
         background-color: #28a267;
     }
-
   </style>
 </head>
 <body>
@@ -86,33 +79,61 @@
     </div>
 
     <script>
-        document.getElementById("loginForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Stop page reload
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    try {
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            alert(data.message); // Show error message
-        } else {
-            alert("Login successful!"); // Show success alert
-            window.location.href = data.redirect; // ✅ Redirect to /responses.html
-        }
-    } catch (error) {
-        alert("An error occurred. Please try again.");
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
     }
-});
+
+    async function checkUserProfile(userId) {
+        try {
+            const response = await fetch(`http://localhost:3000/profile/user/${userId}`);
+            const profiles = await response.json();
+
+            if (profiles.length === 0) {
+                // No profile exists → Redirect to profile creation
+                window.location.href = `profile.html?userId=${userId}`;
+            } else {
+                // Profile exists → Redirect to homepage
+                window.location.href = 'responses.html';
+            }
+        } catch (error) {
+            console.error("Error checking profile:", error);
+        }
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        event.preventDefault(); 
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.message);
+            } else {
+                alert("Login successful!");
+
+                // Store userId & token
+                if (data.userId) localStorage.setItem("userId", data.userId);
+                if (data.token) localStorage.setItem("token", data.token);
+
+                console.log("Redirecting to profile check...");
+                checkUserProfile(data.userId); // Check if user has a profile
+            }
+        } catch (error) {
+            alert("An error occurred. Please try again.");
+            console.error("Login Error:", error);
+        }
+    });
 
     </script>
-    
 </body>
 </html>

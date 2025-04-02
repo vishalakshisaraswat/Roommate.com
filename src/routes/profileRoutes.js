@@ -1,17 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const Profile = require('../models/profile');
+const mongoose = require('mongoose');
+const Questionnaire = require("../models/questionaire.js");
 
 
 // Create Profile Route
 router.post('/create', async (req, res) => {
   try {
 
-    const { profileName, gender, age, userType, languages, address, description, image } = req.body;
+    const { userId, profileName, gender, age, userType, languages, address, description, image } = req.body;
 
     if (!profileName || !gender || !age || !userType || !address || !description) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid User ID' });
+    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
 
     let imageData = null;
     if (image) {
@@ -23,6 +33,7 @@ router.post('/create', async (req, res) => {
     }
 
     const newProfile = new Profile({
+      userId : userObjectId,
       profileName,
       gender,
       age,
@@ -47,58 +58,147 @@ router.post('/create', async (req, res) => {
 router.get('/all', async (req, res) => {
   try {
     const profiles = await Profile.find();
+    const questionnaires = await Questionnaire.find();
 
-    const profilesWithImages = profiles.map(profile => ({
-      ...profile.toObject(),
-      image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
-    }));
+    const getValue = (obj, key) => obj[key] || 'N/A';
 
-    res.json(profilesWithImages);
+    const mergedData = profiles.map(profile => {
+      const profileQuestionnaire = questionnaires.find(q => q.userId.toString() === profile.userId.toString());
+
+      return {
+        userId: profile.userId,
+        profileName: profile.profileName,
+        gender: profile.gender,
+        age: profile.age,
+        userType: profile.userType,
+        languages: profile.languages,
+        address: profile.address,
+        description: profile.description,
+        image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
+
+        // Questionnaire Fields (if available)
+        genderPreference: getValue(profileQuestionnaire, 'genderPreference'),
+        roomBudget: getValue(profileQuestionnaire, 'roomBudget'),
+        accommodationType: getValue(profileQuestionnaire, 'accommodationType'),
+        pets: getValue(profileQuestionnaire, 'pets'),
+        smoking: getValue(profileQuestionnaire, 'smoking'),
+        alcohol: getValue(profileQuestionnaire, 'alcohol'),
+        cleanliness: getValue(profileQuestionnaire, 'cleanliness'),
+        quietEnvironment: getValue(profileQuestionnaire, 'quietEnvironment'),
+        entertainGuests: getValue(profileQuestionnaire, 'entertainGuests')
+      };
+    });
+
+    res.json(mergedData);
   } catch (error) {
     console.error('Error fetching profiles:', error);
     res.status(500).json({ message: 'Error fetching profiles' });
   }
 });
 
+
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Ensure valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid userId' });
+        }
+
+        const profiles = await Profile.find({ userId: new mongoose.Types.ObjectId(userId) });
+
+        if (!profiles.length) {
+            return res.status(404).json([]);
+        }
+
+        const profilesWithImages = profiles.map(profile => ({
+            ...profile.toObject(),
+            image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
+        }));
+
+        res.json(profilesWithImages);
+    } catch (error) {
+        console.error('Error fetching profiles by userId:', error);
+        res.status(500).json({ message: 'Error fetching profiles' });
+    }
+});
 router.get('/responses', async (req, res) => {
+  
+
   try {
+    const { userId } = req.query;
+    console.log("Received User ID:", userId);
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
     const profiles = await Profile.find();
-    const questionaires = await Questionaire.find();
+    const questionnaires = await Questionnaire.find();
+
+    // Find the current user's questionnaire
+    const currentUserQuestionnaire = questionnaires.find(q => q.userId.toString() === userId.toString());
+    if (!currentUserQuestionnaire) {
+      console.log("No questionnaire found for user:", userId);
+      return res.json([]); // Return empty if no questionnaire found
+    }
+
+    const weights = {
+      genderPreference: 10,
+      roomBudget: 15,
+      accommodationType: 10,
+      sleepingSchedule: 8,
+      workArrangement: 8,
+      socialStyle: 8,
+      smoking: 15,
+      alcohol: 15,
+      cleanliness: 15,
+      quietEnvironment: 6,
+      entertainGuests: 5,
+      pets: 10,
+      sharingMeals: 5,
+      language: 10
+    };
+
+    const getValue = (obj, key) => obj[key] || 'N/A';
 
     const mergedData = profiles.map(profile => {
-      const matchingResponse = questionaires.find(q => q.userID === profile.userID);
+      if (profile.userId.toString() === userId.toString()) return null; // Exclude current user
 
-      if (!matchingResponse) return null; // Skip if no questionnaire data
-
-      // Define weightage for different factors
-      const weights = {
-        genderPreference: 20,
-        roomBudget: 15,
-        accommodationType: 10,
-        pets: 10,
-        smoking: 15,
-        alcohol: 10,
-        cleanliness: 15,
-        quietEnvironment: 10,
-        entertainGuests: 5
-      };
+      const profileQuestionnaire = questionnaires.find(q => q.userId.toString() === profile.userId.toString());
+      if (!profileQuestionnaire) {
+        console.log(`No questionnaire found for profile userId: ${profile.userId}`);
+        return null; // Skip if no questionnaire exists
+      }
 
       let score = 0;
       let totalWeight = 0;
 
       Object.keys(weights).forEach(key => {
-        if (matchingResponse[key] && profile[key]) {  // Ensure values exist
-          if (matchingResponse[key] === profile[key]) {
-            score += weights[key]; // Add weight if values match
-          }
-          totalWeight += weights[key]; // Add to total possible score
+        const currentUserValue = getValue(currentUserQuestionnaire, key).toString().toLowerCase().trim();
+        const profileValue = getValue(profileQuestionnaire, key).toString().toLowerCase().trim();
+
+        if (key === 'roomBudget') {
+          const budgetDiff = Math.abs(parseInt(currentUserValue) - parseInt(profileValue));
+          if (budgetDiff <= 200) score += weights[key];
+        } else if (key === 'language' && currentUserQuestionnaire.language && profileQuestionnaire.language) {
+          const commonLanguages = currentUserQuestionnaire.language
+            .split(',')
+            .map(lang => lang.trim().toLowerCase())
+            .filter(lang => profileQuestionnaire.language.toLowerCase().includes(lang));
+          if (commonLanguages.length > 0) score += weights[key];
+        } else if (currentUserValue && profileValue && currentUserValue === profileValue) {
+          score += weights[key];
         }
+
+        totalWeight += weights[key];
       });
 
-      // Calculate match percentage
-      const matchPercentage = totalWeight > 0 ? (score / totalWeight) * 100 : 0;
-      
+      const matchPercentage = totalWeight > 0 ? (score / totalWeight) * 100 : 20;
+
       return {
+        userId: profile.userId,
         profileName: profile.profileName,
         gender: profile.gender,
         age: profile.age,
@@ -107,7 +207,7 @@ router.get('/responses', async (req, res) => {
         address: profile.address,
         description: profile.description,
         // Convert image to Base64 (if available)
-        image: profile.image ? `data:image/png;base64,${profile.image}` : null,
+        image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
 
         // Questionaire Fields
         genderPreference: matchingResponse?.genderPreference || 'N/A',
@@ -121,9 +221,8 @@ router.get('/responses', async (req, res) => {
         entertainGuests: matchingResponse?.entertainGuests || 'N/A',
         matchPercentage: matchPercentage.toFixed(2) // Round to 2 decimal places
       };
-    }).filter(Boolean); // Remove null values
+    }).filter(Boolean);
 
-    // Sort profiles by match percentage in descending order
     mergedData.sort((a, b) => b.matchPercentage - a.matchPercentage);
 
     res.json(mergedData);
@@ -132,6 +231,11 @@ router.get('/responses', async (req, res) => {
     res.status(500).json({ message: 'Error fetching responses' });
   }
 });
+
+
+
+
+
 
 
 module.exports = router;
