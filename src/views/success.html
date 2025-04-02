@@ -25,9 +25,9 @@
         <p id="otpResponse"></p>
     </div>
 
-    <!-- Login Button (Hidden by default) -->
-    <a href="login-signup.html" id="loginButton" style="display: none;">
-        <button>Login</button>
+    <!-- profile Button (Hidden by default) -->
+    <a href="profile.html" id="profileButton" style="display: none;">
+        <button>Profile</button>
     </a>
 
     <script>
@@ -66,7 +66,7 @@
             const aadhaar = localStorage.getItem("aadhaar");
             const otp = document.getElementById("otpInput").value.trim();
             const responseText = document.getElementById("otpResponse");
-            const loginButton = document.getElementById("loginButton");
+            const profileButton = document.getElementById("profileButton");
 
             if (!aadhaar) {
                 responseText.innerHTML = "<span style='color: red;'>Please enter Aadhaar first.</span>";
@@ -88,7 +88,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     responseText.innerHTML = "<span style='color: green;'>OTP Verified Successfully</span>";
-                    loginButton.style.display = "block"; 
+                    profileButton.style.display = "block"; 
                 } else {
                     responseText.innerHTML = `<span style='color: red;'>${data.message}</span>`;
                 }

@@ -15,6 +15,7 @@ const Chat = require('./models/chat'); // Chat model
 const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes.js');
 const questionaireRoutes = require('./routes/questionaireRoutes.js');
+const queswithRoomRoutes = require('./routes/ques-withRoomRoutes.js');
 const roomRoutes = require('./routes/roomRoutes.js');
 const expenseRoutes = require('./routes/expenseRoutes.js');
 const chatRoutes = require('./routes/chatRoutes.js');
@@ -34,6 +35,7 @@ const dummyData = new Set([
 ]);
 
 app.use(cors());
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
@@ -137,6 +139,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'login.html')));
 app.get('/room', (req, res) => res.sendFile(path.join(__dirname, 'views', 'room.html')));
 app.get('/quessionaire', (req, res) => res.sendFile(path.join(__dirname, 'views', 'quessionaire.html')));
+app.get('/ques-withRoom.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'ques-withRoom.html')));
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
 app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'views', 'chat.html')));
 app.get('/expenses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'expenses.html')));
@@ -146,7 +149,8 @@ app.use('/', userRoutes);
 app.use('/profile', profileRoutes);
 app.use('/room', roomRoutes);
 app.use('/questionaire', questionaireRoutes);
-app.use('/chat', chatRoutes);
+app.use('/ques-withRoom', queswithRoomRoutes)
+app.use('/chat', chatRoutes);;
 app.use('/', expenseRoutes);
 
 

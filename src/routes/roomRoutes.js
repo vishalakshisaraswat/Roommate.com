@@ -5,74 +5,87 @@ const multer = require('multer');
 const router = express.Router();
 
 const upload = multer({
-  storage: multer.memoryStorage(), // or set up local disk storage
+  storage: multer.memoryStorage(), // Using memory storage
   limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5 MB
 });
 
-// // Route to create room
-// router.post('/create', upload.array('photos', 4), async (req, res) => {
-//   try {
-//     const { address, rent, description, availableSpacesForRoommates } = req.body;
-//     const photos = req.files.map(file => file.originalname); // Save file names or URLs
-
-//     if (!address || !rent || !availableSpacesForRoommates) {
-//       return res.status(400).json({ message: 'All fields are required' });
-//     }
-//     console.log(req.body);
-//     console.log(photos);
-
-//     const newRoom = new Room({
-//       roomId: new mongoose.Types.ObjectId().toString(),
-//       address,
-//       rent,
-//       description,
-//       availableSpacesForRoommates,
-//       photos,
-//       roomId: new mongoose.Types.ObjectId()
-//     });
-
-//     await newRoom.save();
-//     res.status(201).json({ msg: 'Room details stored successfully', room: newRoom });
-//   } catch (err) {
-//     console.error(err.message);
-//     res.status(500).send('Server Error');
-//   }
-// });
-
+// Route to create a new room
 router.post('/create', upload.array('photos', 4), async (req, res) => {
   try {
-    const { address, rent, description } = req.body;
+    const {
+      roomType,
+      washroomType,
+      furnishing,
+      city,
+      area,
+      colony,
+      address,
+      rent,
+      availability,
+      internetAccess,
+      internetType,
+      parking,
+      ac,
+      heater,
+      balcony,
+      kitchen
+    } = req.body;
 
-    if (!address || !rent) {
-      return res.status(400).json({ message: 'All fields are required' });
+    // Validate required fields
+    if (!roomType || !washroomType || !furnishing || !city || !area || !colony || !address || !rent || !availability) {
+      return res.status(400).json({ message: 'All required fields must be provided' });
     }
 
-    const photos = req.files.map(file => file.buffer.toString('base64')); // Convert to Base64
+    // Convert internetAccess and parking to Boolean values
+    const internetAccessBoolean = internetAccess === "true";
+    const parkingBoolean = parking === "true";
+
+    // Convert amenities to Boolean values
+    const amenities = {
+      ac: ac === "true",
+      heater: heater === "true",
+      balcony: balcony === "true",
+      kitchen: kitchen === "true"
+    };
+
+    // Convert uploaded photos to Base64
+    const photos = req.files.map(file => file.buffer.toString('base64'));
 
     const newRoom = new Room({
       roomId: new mongoose.Types.ObjectId().toString(),
+      roomType,
+      washroomType,
+      furnishing,
+      city,
+      area,
+      colony,
       address,
       rent,
-      description,
-      photos, // Store Base64-encoded images
+      availability,
+      internetAccess: internetAccessBoolean,
+      internetType: internetAccessBoolean ? internetType : null, // Only store if internet is available
+      parking: parkingBoolean,
+      amenities,
+      photos
     });
 
     await newRoom.save();
     res.status(201).json({ msg: 'Room details stored successfully', room: newRoom });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 });
 
-
+// Route to fetch all rooms
 router.get('/all', async (req, res) => {
   try {
     const rooms = await Room.find();
 
     const roomsWithImages = rooms.map(room => ({
       ...room.toObject(),
-      photos: room.photos.map(photo => `data:image/png;base64,${photo}`), // Convert images to Base64
+      photos: room.photos.map(photo => `data:image/png;base64,${photo}`), // Convert images to Base64 format
     }));
 
     res.json(roomsWithImages);
@@ -81,6 +94,5 @@ router.get('/all', async (req, res) => {
     res.status(500).json({ message: 'Error fetching rooms' });
   }
 });
-
 
 module.exports = router;
