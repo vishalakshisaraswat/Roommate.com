@@ -103,6 +103,7 @@
             <a href="roomdetails.html">Rooms</a>
             <a href="chat.html">Chat</a>
             <a href="../iLanding/index.html">Log Out</a>
+
         </div>
     </div>
     <h1>Roommate Profiles</h1>
@@ -118,16 +119,7 @@
             <option value="Other">Other</option>
         </select>
         <input type="text" id="locationFilter" class="filter" placeholder="Location">
-        <select id="smokingFilter" class="filter">
-            <option value="">Smoking Preference</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
-        <select id="alcoholFilter" class="filter">
-            <option value="">Alcohol Preference</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
+        
         <button onclick="applyFilters()" class="filter">Apply Filters</button>
     </div>
 
@@ -175,15 +167,15 @@ document.addEventListener("DOMContentLoaded", function () {
         async function fetchProfiles() {
     try {
         const response = await fetch('/profile/all');
-        const profiles = await response.json();
-        displayProfiles(profiles);
+        profiles = await response.json(); // Store globally
+        displayProfiles(profiles); // Display profiles
     } catch (error) {
         console.error('Error fetching profiles:', error);
     }
 }
 
 
-        function displayProfiles(data) {
+function displayProfiles(data) {
     const lookingForRoomContainer = document.getElementById('looking-for-room');
     const hasRoomContainer = document.getElementById('has-room');
 
@@ -193,6 +185,16 @@ document.addEventListener("DOMContentLoaded", function () {
     data.forEach(entry => {
         const imageSrc = entry.image || 'https://via.placeholder.com/250';
 
+        // Generate a unique key for each userId in localStorage
+        const matchKey = `matchScore_${entry.userId}`; // Using userId as key
+        let matchScore = localStorage.getItem(matchKey);
+
+        // If matchScore does not exist, generate and store it
+        if (!matchScore) {
+            matchScore = Math.floor(Math.random() * 90) + 10;
+            localStorage.setItem(matchKey, matchScore);
+        }
+
         const card = document.createElement('div');
         card.className = 'profile-card';
         card.innerHTML = `
@@ -201,7 +203,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <div class="profile-name">${entry.profileName || 'N/A'}</div>
                 <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
                 <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-            
+                <div class="profile-info"><strong>Match Score:</strong> ${matchScore}%</div>
             </div>
         `;
 
@@ -218,27 +220,23 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 }
 
-
         
 
-        function applyFilters() {
-            let filteredProfiles = profiles;
-            const minAge = document.getElementById('minAge').value;
-            const maxAge = document.getElementById('maxAge').value;
-            const gender = document.getElementById('genderFilter').value;
-            const location = document.getElementById('locationFilter').value.toLowerCase();
-            const smoking = document.getElementById('smokingFilter').value;
-            const alcohol = document.getElementById('alcoholFilter').value;
+function applyFilters() {
+    let filteredProfiles = [...profiles]; // Copy original profiles array
+    const minAge = document.getElementById('minAge').value;
+    const maxAge = document.getElementById('maxAge').value;
+    const gender = document.getElementById('genderFilter').value;
+    const location = document.getElementById('locationFilter').value.toLowerCase();
 
-            if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
-            if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
-            if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
-            if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
-            if (smoking) filteredProfiles = filteredProfiles.filter(p => p.smoking === smoking);
-            if (alcohol) filteredProfiles = filteredProfiles.filter(p => p.alcohol === alcohol);
+    if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
+    if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
+    if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
+    if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
 
-            displayProfiles(filteredProfiles);
-        }
+    displayProfiles(filteredProfiles); // Redisplay filtered results
+}
+
 
         window.onload = fetchProfiles;
     </script>
