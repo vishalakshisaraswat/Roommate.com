@@ -1,244 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roommate Profiles</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #b3d9ea;
-            text-align: center;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .filters-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .filter {
-            padding: 8px;
-            font-size: 14px;
-        }
-        .section-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 30px;
-            color: #333;
-        }
-        .profiles-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-        .profile-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            width: 250px;
-            overflow: hidden;
-            text-align: left;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .profile-card:hover {
-            transform: scale(1.05);
-        }
-        .profile-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .profile-content {
-            padding: 15px;
-        }
-        .profile-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .profile-info {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 10px;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            padding: 10px 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .navbar .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        .nav-links a {
-            color: #2c3e50;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .nav-links a:hover {
-            color: #0073e6;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roommate Profiles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #b3d9ea;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .filters-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter {
+      padding: 8px;
+      font-size: 14px;
+    }
+    .profiles-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .profile-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+      width: 250px;
+      overflow: hidden;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .profile-card:hover {
+      transform: scale(1.05);
+    }
+    .profile-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .profile-content {
+      padding: 15px;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: white;
+      padding: 10px 20px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .navbar .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    .nav-links a {
+      color: #2c3e50;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    .nav-links a:hover {
+      color: #0073e6;
+    }
+  </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="logo">RoomMate</div>
-        <div class="nav-links">
-            <a href="responses.html">Profiles</a>
-            <a href="roomdetails.html">Rooms</a>
-            <a href="chat.html">Chat</a>
-            <a href="../iLanding/index.html">Log Out</a>
-
-        </div>
+  <div class="navbar">
+    <div class="logo">RoomMate</div>
+    <div class="nav-links">
+      <a href="responses.html">Profiles</a>
+      <a href="roomdetails.html">Rooms</a>
+      <a href="chat.html">Chat</a>
+      <a href="../iLanding/index.html">Log Out</a>
     </div>
-    <h1>Roommate Profiles</h1>
+  </div>
 
-    <!-- Filters Section -->
-    <div class="filters-container">
-        <input type="number" id="minAge" class="filter" placeholder="Min Age" min="18">
-        <input type="number" id="maxAge" class="filter" placeholder="Max Age" min="18">
-        <select id="genderFilter" class="filter">
-            <option value="">All Genders</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-        <input type="text" id="locationFilter" class="filter" placeholder="Location">
-        
-        <button onclick="applyFilters()" class="filter">Apply Filters</button>
-    </div>
+  <h1>Roommate Profiles</h1>
 
-    <div class="profiles-container" id="looking-for-room"></div>
+  <!-- Filters Section -->
+  <div class="filters-container">
+    <input type="number" id="minAge" class="filter" placeholder="Min Age" min="18">
+    <input type="number" id="maxAge" class="filter" placeholder="Max Age" min="18">
+    <select id="genderFilter" class="filter">
+      <option value="">All Genders</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" id="locationFilter" class="filter" placeholder="Location">
+    <button onclick="applyFilters()" class="filter">Apply Filters</button>
+  </div>
 
-    <div class="profiles-container" id="has-room"></div>
+  <div class="profiles-container" id="profiles"></div>
 
-    <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Extract userId from the URL
-    const urlParams = new URLSearchParams(window.location.search);
-    let userId = urlParams.get("userId");
+  <script>
+    const profileContainer = document.getElementById('profiles');
+    let profiles = [];
 
-    if (userId) {
-        sessionStorage.setItem("userId", userId); // Store userId in session storage
-    } else {
-        userId = sessionStorage.getItem("userId"); // Fallback to session storage if missing
-    }
+    document.addEventListener('DOMContentLoaded', async () => {
+      const userId = localStorage.getItem('userId');
 
-    if (!userId) {
-        console.log("User ID not found");
-        return;
-    }
+      try {
+        const [aiRes, allRes] = await Promise.all([
+          fetch(`/questionaire/ai-match/${userId}`),
+          fetch('/profile/all')
+        ]);
 
-    // Fetch responses using userId
-    fetch(`/responses?userId=${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            console.log("Fetched responses:", data);
-            // Process and display matched profiles
+        const matches = await aiRes.json();
+        const allProfiles = await allRes.json();
+
+        profiles = allProfiles.map(profile => {
+          const match = matches.find(m => m.userId === profile.userId);
+          return {
+            ...profile,
+            matchScore: match ? Math.round(match.matchPercentage) : 0
+          };
         })
-        .catch(error => console.error("Error fetching responses:", error));
+        .filter(profile => profile.matchScore > 0);
+        // Sort by matchScore descending
+profiles.sort((a, b) => b.matchScore - a.matchScore);
 
-    // Update Chat link to include userId dynamically
-    const chatLink = document.querySelector('.nav-links a[href="chat.html"]');
-    if (chatLink) {
-        chatLink.href = `chat.html?userId=${userId}`;
-    }
-});
-
+// Optional: limit to top N matches
+const topN = 20;
+profiles = profiles.slice(0, topN);
 
 
-        let profiles = []; // Store fetched profiles globally
-
-        async function fetchProfiles() {
-    try {
-        const response = await fetch('/profile/all');
-        profiles = await response.json(); // Store globally
-        displayProfiles(profiles); // Display profiles
-    } catch (error) {
-        console.error('Error fetching profiles:', error);
-    }
-}
-
-
-function displayProfiles(data) {
-    const lookingForRoomContainer = document.getElementById('looking-for-room');
-    const hasRoomContainer = document.getElementById('has-room');
-
-    lookingForRoomContainer.innerHTML = '';
-    hasRoomContainer.innerHTML = '';
-
-    data.forEach(entry => {
-        const imageSrc = entry.image || 'https://via.placeholder.com/250';
-
-        // Generate a unique key for each userId in localStorage
-        const matchKey = `matchScore_${entry.userId}`; // Using userId as key
-        let matchScore = localStorage.getItem(matchKey);
-
-        // If matchScore does not exist, generate and store it
-        if (!matchScore) {
-            matchScore = Math.floor(Math.random() * 90) + 10;
-            localStorage.setItem(matchKey, matchScore);
-        }
-
-        const card = document.createElement('div');
-        card.className = 'profile-card';
-        card.innerHTML = `
-            <img src="${imageSrc}" alt="Profile Picture">
-            <div class="profile-content">
-                <div class="profile-name">${entry.profileName || 'N/A'}</div>
-                <div class="profile-info">Age: ${entry.age || 'N/A'} | ${entry.gender || 'N/A'}</div>
-                <div class="profile-info"><strong>Location:</strong> ${entry.address || 'N/A'}</div>
-                <div class="profile-info"><strong>Match Score:</strong> ${matchScore}%</div>
-            </div>
-        `;
-
-        card.onclick = () => {
-            sessionStorage.setItem('profileData', JSON.stringify(entry));
-            window.location.href = 'profile-details.html';
-        };
-
-        if (entry.hasRoom) {
-            hasRoomContainer.appendChild(card);
-        } else {
-            lookingForRoomContainer.appendChild(card);
-        }
+        displayProfiles(profiles);
+      } catch (err) {
+        console.error("Error loading profiles:", err);
+      }
     });
+
+
+    function displayProfiles(profileList) {
+  console.log("Displaying profiles:", profileList);
+  profileContainer.innerHTML = ''; // ✅ Corrected
+
+  profileList.forEach(profile => {
+    console.log("Profile Data:", profile);
+
+    const card = document.createElement('div');
+    card.classList.add('profile-card');
+
+    card.innerHTML = `
+      <img src="${profile.image || 'default.jpg'}" alt="Profile Image">
+      <div class="profile-content">
+        <h3>${profile.profileName} (${profile.age})</h3>
+        <p><strong>Gender:</strong> ${profile.gender}</p>
+        <p><strong>Location:</strong> ${profile.address}</p>
+        <p><strong>Match:</strong> ${profile.matchScore}%</p>
+        <button onclick="startChat('${profile.userId}')">Chat</button>
+      </div>
+    `;
+
+    profileContainer.appendChild(card);
+  });
 }
 
-        
 
-function applyFilters() {
-    let filteredProfiles = [...profiles]; // Copy original profiles array
-    const minAge = document.getElementById('minAge').value;
-    const maxAge = document.getElementById('maxAge').value;
-    const gender = document.getElementById('genderFilter').value;
-    const location = document.getElementById('locationFilter').value.toLowerCase();
+ 
 
-    if (minAge) filteredProfiles = filteredProfiles.filter(p => p.age >= parseInt(minAge));
-    if (maxAge) filteredProfiles = filteredProfiles.filter(p => p.age <= parseInt(maxAge));
-    if (gender) filteredProfiles = filteredProfiles.filter(p => p.gender === gender);
-    if (location) filteredProfiles = filteredProfiles.filter(p => p.address.toLowerCase().includes(location));
+    function startChat(receiverId) {
+      const senderId = localStorage.getItem('userId');
+      if (!senderId || !receiverId) return alert("Missing user ID");
+      window.location.href = `/chat.html?sender=${senderId}&receiver=${receiverId}`;
+    }
 
-    displayProfiles(filteredProfiles); // Redisplay filtered results
-}
+    function applyFilters() {
+      const minAge = document.getElementById('minAge').value;
+      const maxAge = document.getElementById('maxAge').value;
+      const gender = document.getElementById('genderFilter').value;
+      const location = document.getElementById('locationFilter').value.toLowerCase();
 
+      let filtered = profiles;
 
-        window.onload = fetchProfiles;
-    </script>
+      if (minAge) filtered = filtered.filter(p => p.age >= parseInt(minAge));
+      if (maxAge) filtered = filtered.filter(p => p.age <= parseInt(maxAge));
+      if (gender) filtered = filtered.filter(p => p.gender === gender);
+      if (location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
+
+      displayProfiles(filtered);
+    }
+  </script>
 </body>
 </html>

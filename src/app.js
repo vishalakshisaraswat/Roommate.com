@@ -14,9 +14,9 @@ const Questionaire = require('./models/questionaire');
 const Chat = require('./models/chat'); // Chat model
 const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes.js');
-const questionaireRoutes = require('./routes/questionaireRoutes.js');
+const questionaireRoutes = require('./routes/questionaireRoutes');
 const queswithRoomRoutes = require('./routes/ques-withRoomRoutes.js');
-const roomRoutes = require('./routes/roomRoutes.js');
+const roomRoutes = require('./routes/roomRoutes');
 const expenseRoutes = require('./routes/expenseRoutes.js');
 const chatRoutes = require('./routes/chatRoutes.js');
 
@@ -45,27 +45,6 @@ connectDB();
 const users = {}; // Store connected users (socket.id -> username)
 
 const axios = require('axios'); // Ensure Axios is installed: npm install axios
-
-app.get('/recommendations/:userId', async (req, res) => {
-    try {
-        const userId = req.params.userId;
-
-        // Fetch user data from MongoDB
-        const user = await Profile.findById(userId);
-        if (!user) return res.status(404).json({ error: "User not found" });
-
-        // Send user traits to Python API
-        const response = await axios.post('http://127.0.0.1:8000/recommend', {
-            user_traits: user.traits // Example: ["Night Owl", "Extrovert", "Non-smoker"]
-        });
-
-        // Return recommended roommates
-        res.json(response.data);
-    } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
 
 
 // WebSocket connection
@@ -117,9 +96,7 @@ io.on('connection', async (socket) => {
 app.get('/', (req, res) => {
     res.send('Welcome to the Aadhaar e-KYC API!');
 });
-app.get('/chat', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'chat.html'));
-});
+
 
 app.post('/sendAadhaar', async (req, res) => {
     const { aadhaar } = req.body;
@@ -170,8 +147,8 @@ app.get('/ques-withRoom.html', (req, res) => res.sendFile(path.join(__dirname, '
 app.get('/responses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'responses.html')));
 app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'views', 'chat.html')));
 app.get('/expenses.html', (req, res) => res.sendFile(path.join(__dirname, 'views', 'expenses.html')));
-const recommendationRoutes = require('./routes/recommendationRoutes');
-app.use('/recommend', recommendationRoutes);
+
+  
 // Routes
 app.use('/', userRoutes);
 app.use('/profile', profileRoutes);
@@ -180,6 +157,13 @@ app.use('/questionaire', questionaireRoutes);
 app.use('/ques-withRoom', queswithRoomRoutes)
 app.use('/chat', chatRoutes);;
 app.use('/', expenseRoutes);
+
+
+app._router.stack.forEach((r) => {
+    if (r.route && r.route.path) {
+        console.log(r.route.path);
+    }
+});
 
 
 // Start server
