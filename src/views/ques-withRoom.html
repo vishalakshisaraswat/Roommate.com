@@ -162,92 +162,75 @@
         </form>
     </div>
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("DOM fully loaded"); // Debugging log
-
-    const form = document.getElementById('ques-withRoom-form');
-    
-    if (!form) {
-        console.error("Form not found! Check if 'id=\"ques-withRoom-form\"' exists in your HTML.");
-        return;
-    }
-
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault(); // Prevent default form submission
-        console.log("Form submission event triggered"); // Debugging log
-
-        // Collect form data
-        const formData = new FormData(this);
-        const data = {};
-
-        formData.forEach((value, key) => {
-            if (data[key]) {
-                if (!Array.isArray(data[key])) {
-                    data[key] = [data[key]];
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('ques-withRoom-form');
+        
+            // ✅ Get userId from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get("userId");
+        
+            form.addEventListener('submit', async function (event) {
+                event.preventDefault();
+        
+                const formData = new FormData(this);
+                const data = {};
+        
+                formData.forEach((value, key) => {
+                    if (data[key]) {
+                        if (!Array.isArray(data[key])) {
+                            data[key] = [data[key]];
+                        }
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                });
+        
+                // ✅ Add userId to the data sent to backend
+                if (userId) {
+                    data.userID = userId;
                 }
-                data[key].push(value);
-            } else {
-                data[key] = value;
-            } 
-        });
-
-        console.log("Submitting form data:", data); // Debugging log
-
-        // Send data to backend via POST request
-        try {
-            const response = await fetch('http://localhost:3000/ques-withRoom/submit-form', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-
-                // Redirect to response.html
-                window.location.href = 'responses.html';
-            } else {
-                alert(result.message || 'Error submitting form. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('Error submitting form. Please try again.');
-        }
-    });
-});
-
-        const radios = document.querySelectorAll('input[name="location_preference"]');
-        const addressDiv = document.getElementById('address-details');
-    
-        radios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (radio.value === 'yes') {
-                    addressDiv.style.display = 'block';
-                } else {
-                    addressDiv.style.display = 'none';
+        
+                try {
+                    const response = await fetch('http://localhost:3000/ques-withRoom/submit-form', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+        
+                    const result = await response.json();
+        
+                    if (response.ok) {
+                        // ✅ Redirect with userId
+                        window.location.href = `responses.html?userId=${userId}`;
+                    } else {
+                        alert(result.message || 'Error submitting form.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error submitting form. Please try again.');
                 }
             });
-        });
-
-        function toggleOtherLanguage(value) {
-    const otherInput = document.getElementById("other_language_input");
-    if (value === "Other") {
-        otherInput.style.display = "block";
-    } else {
-        otherInput.style.display = "none";
-    }
-    }  
-    
-    function toggleOtherLanguage(checkbox) {
-            const otherInput = document.getElementById("other_language_input");
-            if (checkbox.checked) {
-                otherInput.style.display = "block";
-            } else {
-                otherInput.style.display = "none";
+        
+            // Handle other language toggle
+            const radios = document.querySelectorAll('input[name="location_preference"]');
+            const addressDiv = document.getElementById('address-details');
+        
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    addressDiv.style.display = radio.value === 'yes' ? 'block' : 'none';
+                });
+            });
+        
+            function toggleOtherLanguage(checkbox) {
+                const otherInput = document.getElementById("other_language_input");
+                otherInput.style.display = checkbox.checked ? "block" : "none";
             }
-        }
-
-    </script>
+        
+            window.toggleOtherLanguage = toggleOtherLanguage; // Make accessible globally
+        });
+        </script>
+        
+         
 </body>
 </html>

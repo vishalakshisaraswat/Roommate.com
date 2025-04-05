@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const RoommateSchema = new mongoose.Schema({
+    userID: { type: String, required: true },
     genderPreference: { type: String, enum: ['male', 'female', 'no-preference'], required: true },
     ageGroup: { type: String, enum: ['18-25', '26-35', '36-45', 'no-preference'], required: true },
     sleepingSchedule: { type: String, enum: ['morning-person', 'night-person', 'no-preference'], required: true },
@@ -19,6 +20,7 @@ const RoommateSchema = new mongoose.Schema({
     additionalPreferences: { type: String },
 }, { timestamps: true });
 
-const Roommate = mongoose.model('Roommate', RoommateSchema);
+// 💥 Force it to use 'ques-withRooms' collection
+const Roommate = mongoose.model('Roommate', RoommateSchema, 'ques-withRoom');
 
 module.exports = Roommate;

@@ -8,11 +8,12 @@ router.post("/submit-form", async (req, res) => {
         console.log("Received Data:", req.body);
 
         let formattedData = {
+            userID: req.body.userID,  // ✅ Include userID
             genderPreference: req.body["gender-preference"],
             ageGroup: req.body["age-group"],
             sleepingSchedule: req.body["sleeping-schedule"],
-            workArrangement: req.body["work_arrangement"], // correct
-            socialStyle: req.body["social_style"], // correct
+            workArrangement: req.body["work_arrangement"],
+            socialStyle: req.body["social_style"],
             languages: Array.isArray(req.body.language) ? req.body.language : [],
             smoking: req.body.smoking,
             alcohol: req.body.alcohol,
@@ -26,12 +27,10 @@ router.post("/submit-form", async (req, res) => {
             additionalPreferences: req.body["additional-preferences"],
         };
         
-
-        // Include "other_language" in the "language" array if provided
         if (req.body.other_language && req.body.other_language.trim() !== "") {
-            formattedData.language.push(req.body.other_language.trim());
+            formattedData.languages.push(req.body.other_language.trim());
         }
-
+        
         console.log("Formatted Data:", formattedData);
 
         const newPreferences = new Roommate(formattedData);
@@ -68,18 +67,6 @@ router.get("/all", async (req, res) => {
         res.status(200).json(preferences);
     } catch (error) {
         res.status(500).json({ message: "Error fetching preferences" });
-    }
-});
-
-router.post("/submit-form", async (req, res) => {
-    try {
-        console.log("Received Data:", req.body);  // Debugging
-        const newPreferences = new Roommate(req.body);
-        await newPreferences.save();
-        res.status(201).json({ message: "Preferences saved!", data: newPreferences });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ message: "Server Error" });
     }
 });
 

@@ -13,6 +13,7 @@ const upload = multer({
 router.post('/create', upload.array('photos', 4), async (req, res) => {
   try {
     const {
+      userId,
       roomType,
       washroomType,
       furnishing,
@@ -31,15 +32,22 @@ router.post('/create', upload.array('photos', 4), async (req, res) => {
       kitchen
     } = req.body;
 
-    // Validate required fields
-    if (!roomType || !washroomType || !furnishing || !city || !area || !colony || !address || !rent || !availability) {
-      return res.status(400).json({ message: 'All required fields must be provided' });
-    }
+    // Convert checkbox values from string to boolean
+    const internetAccessBoolean = internetAccess === 'on';
+    const parkingBoolean = parking === 'on';
 
-    const photos = req.files.map(file => file.buffer.toString('base64')); // Convert to Base64
+    const amenities = {
+      ac: ac === 'on',
+      heater: heater === 'on',
+      balcony: balcony === 'on',
+      kitchen: kitchen === 'on'
+    };
+
+    const photos = req.files.map(file => file.buffer.toString('base64'));
 
     const newRoom = new Room({
       roomId: new mongoose.Types.ObjectId().toString(),
+      userId, // ✅ Include userId here
       roomType,
       washroomType,
       furnishing,
@@ -50,7 +58,7 @@ router.post('/create', upload.array('photos', 4), async (req, res) => {
       rent,
       availability,
       internetAccess: internetAccessBoolean,
-      internetType: internetAccessBoolean ? internetType : null, // Only store if internet is available
+      internetType: internetAccessBoolean ? internetType : null,
       parking: parkingBoolean,
       amenities,
       photos
@@ -64,6 +72,7 @@ router.post('/create', upload.array('photos', 4), async (req, res) => {
     res.status(500).send('Server Error');
   }
 });
+
 
 // Route to fetch all rooms
 router.get('/all', async (req, res) => {
