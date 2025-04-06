@@ -221,6 +221,7 @@
             if (data.userType === 'roommateSeekerWithRoom') {
     window.location.href = `/room?userId=${storedUserId}`;
 } else if (data.userType === 'roommateSeekerWithoutRoom') {
+    localStorage.setItem('formType', 'questionaire');
     window.location.href = `/quessionaire?userId=${storedUserId}`;
 }
 

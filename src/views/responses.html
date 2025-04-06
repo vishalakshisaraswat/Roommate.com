@@ -108,7 +108,7 @@
 
   <div class="profiles-container" id="profiles"></div>
 
-  <script>
+  <!-- <script>
     const profileContainer = document.getElementById('profiles');
     let profiles = [];
 
@@ -196,6 +196,99 @@ profiles = profiles.slice(0, topN);
 
       displayProfiles(filtered);
     }
+  </script> -->
+
+
+  <script>
+    const profileContainer = document.getElementById('profiles');
+    let profiles = [];
+  
+    document.addEventListener('DOMContentLoaded', async () => {
+      const userId = localStorage.getItem('userId');
+      const formType = localStorage.getItem('formType');
+  
+      if (!userId || !formType) return alert("Missing user ID or form type");
+  
+      let matchEndpoint = '';
+      if (formType === 'questionaire') {
+        matchEndpoint = `/questionaire/ai-match/${userId}`;
+      } else if (formType === 'withRoom') {
+        matchEndpoint = `/ques-withRoom/ai-match/${userId}`;
+      } else {
+        return alert("Invalid form type");
+      }
+  
+      try {
+        const [matchRes, allProfilesRes] = await Promise.all([
+          fetch(matchEndpoint),
+          fetch('/profile/all')
+        ]);
+  
+        const matches = await matchRes.json();
+        const allProfiles = await allProfilesRes.json();
+  
+        profiles = allProfiles.map(profile => {
+          const match = matches.find(m => m.userId === profile.userId);
+          return {
+            ...profile,
+            matchScore: match ? Math.round(match.matchPercentage) : 0
+          };
+        }).filter(profile => profile.matchScore > 0);
+  
+        profiles.sort((a, b) => b.matchScore - a.matchScore);
+        profiles = profiles.slice(0, 20); // Optional top N
+  
+        displayProfiles(profiles);
+      } catch (err) {
+        console.error("Error loading profiles:", err);
+        alert("Failed to load matched profiles.");
+      }
+    });
+  
+    function displayProfiles(profileList) {
+      profileContainer.innerHTML = '';
+  
+      profileList.forEach(profile => {
+        const card = document.createElement('div');
+        card.classList.add('profile-card');
+  
+        card.innerHTML = `
+          <img src="${profile.image || 'default.jpg'}" alt="Profile Image">
+          <div class="profile-content">
+            <h3>${profile.profileName} (${profile.age})</h3>
+            <p><strong>Gender:</strong> ${profile.gender}</p>
+            <p><strong>Location:</strong> ${profile.address}</p>
+            <p><strong>Match:</strong> ${profile.matchScore}%</p>
+            <button onclick="startChat('${profile.userId}')">Chat</button>
+          </div>
+        `;
+  
+        profileContainer.appendChild(card);
+      });
+    }
+  
+    function startChat(receiverId) {
+      const senderId = localStorage.getItem('userId');
+      if (!senderId || !receiverId) return alert("Missing user ID");
+      window.location.href = `/chat.html?sender=${senderId}&receiver=${receiverId}`;
+    }
+  
+    function applyFilters() {
+      const minAge = document.getElementById('minAge').value;
+      const maxAge = document.getElementById('maxAge').value;
+      const gender = document.getElementById('genderFilter').value;
+      const location = document.getElementById('locationFilter').value.toLowerCase();
+  
+      let filtered = profiles;
+  
+      if (minAge) filtered = filtered.filter(p => p.age >= parseInt(minAge));
+      if (maxAge) filtered = filtered.filter(p => p.age <= parseInt(maxAge));
+      if (gender) filtered = filtered.filter(p => p.gender === gender);
+      if (location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
+  
+      displayProfiles(filtered);
+    }
   </script>
+  
 </body>
 </html>

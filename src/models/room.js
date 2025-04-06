@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema({
   roomId: { type: String, unique: true, required: true }, // Explicitly defined
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', required: true },
 
   // Describe Your Room (First in HTML)
   roomType: { type: String, enum: ["Single", "Double", "Suite"], required: true },

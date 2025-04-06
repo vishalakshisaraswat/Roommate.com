@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +10,7 @@
     <div class="card">
         <h1><U>Roommate Preferences</U></h1>
         <form id="ques-withRoom-form" action="/ques-withRoom/submit-form" method="POST">
-            <!-- Gender Preference -->
+            
             <div class="question">
                 <label><h2>Prefered gender for your roommate:</h2></label>
                 <label><input type="radio" name="gender-preference" value="male" required> Male</label>
@@ -18,7 +18,7 @@
                 <label><input type="radio" name="gender-preference" value="no-preference"> No Preference</label>
             </div>
 
-            <!-- Age Group -->
+            
             <div class="question">
                 <label><h2>What is your preferred age range for your roommate?</h2></label>
                 <select name="age-group" required>
@@ -55,7 +55,7 @@
             </div>
             
             
-            <!-- Language Selection -->
+            
             <div class="question">
                 <label><h2>Which languages are you comfortable with?</h2></label>
                 <div id="language-options">
@@ -161,11 +161,11 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-    <script>
+    <!-- <script>
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('ques-withRoom-form');
         
-            // ✅ Get userId from URL
+    
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get("userId");
         
@@ -201,7 +201,7 @@
                     const result = await response.json();
         
                     if (response.ok) {
-                        // ✅ Redirect with userId
+                        
                         window.location.href = `responses.html?userId=${userId}`;
                     } else {
                         alert(result.message || 'Error submitting form.');
@@ -212,7 +212,7 @@
                 }
             });
         
-            // Handle other language toggle
+        
             const radios = document.querySelectorAll('input[name="location_preference"]');
             const addressDiv = document.getElementById('address-details');
         
@@ -227,10 +227,76 @@
                 otherInput.style.display = checkbox.checked ? "block" : "none";
             }
         
-            window.toggleOtherLanguage = toggleOtherLanguage; // Make accessible globally
+            window.toggleOtherLanguage = toggleOtherLanguage; 
         });
         </script>
-        
-         
+         -->
+         <script>
+             document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('ques-withRoom-form');
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("userId");
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const data = {};
+
+      formData.forEach((value, key) => {
+        if (data[key]) {
+          if (!Array.isArray(data[key])) {
+            data[key] = [data[key]];
+          }
+          data[key].push(value);
+        } else {
+          data[key] = value;
+        }
+      });
+
+      // ✅ Ensure userId is appended correctly
+      if (userId) {
+        data.userId = userId;
+      }
+
+      try {
+        const response = await fetch('/ques-withRoom/submit-form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          window.location.href = `responses.html?userId=${userId}`;
+        } else {
+          alert(result.message || 'Error submitting form.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error submitting form. Please try again.');
+      }
+    });
+              // Language "Other" toggle logic
+              window.toggleOtherLanguage = function (checkbox) {
+                const otherInput = document.getElementById("other_language_input");
+                otherInput.style.display = checkbox.checked ? "block" : "none";
+              };
+            });
+          </script>
 </body>
-</html>
+</html> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

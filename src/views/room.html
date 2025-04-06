@@ -90,6 +90,7 @@
 
                     if (response.ok) {
     alert("Room details stored successfully!");
+    localStorage.setItem('formType', 'withRoom');
     window.location.href = `ques-withRoom.html?userId=${storedUserId}`;
 } else {
                         alert("Failed to store room details. Please try again.");
