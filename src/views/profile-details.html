@@ -74,28 +74,49 @@
   </div>
 
   <script>
-    const profileData = JSON.parse(sessionStorage.getItem('profileData'));
-
-    if (profileData) {
-      document.getElementById('profile-name').textContent = profileData.profileName || "Unknown";
-      document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
-      document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
-      document.getElementById('profile-preference').textContent = `Looking for: ${profileData.smoking || "N/A"}, ${profileData.alcohol || "N/A"}`;
-      document.getElementById('profile-about').textContent = profileData.description || "No description available.";
-      document.getElementById('profile-location').textContent = `Location: ${profileData.address || "Location not available"}`;
-      document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
-
-      // ✅ Create Google Maps link dynamically
-      const mapLink = document.getElementById('map-link');
-      if (profileData.address) {
-        mapLink.href = `https://www.google.com/maps/search/?q=${encodeURIComponent(profileData.address)}`;
-      } else {
-        mapLink.style.display = "none"; // Hide link if no address is found
+    async function loadProfile() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('userId');
+  
+      if (!userId) {
+        alert("No user ID provided in URL.");
+        return;
       }
-    } else {
-      alert("No profile data found.");
+  
+      try {
+        const res = await fetch('/profile/all');
+        const profiles = await res.json();
+  
+        const profileData = profiles.find(profile => profile.userId === userId);
+  
+        if (!profileData) {
+          alert("Profile not found.");
+          return;
+        }
+  
+        document.getElementById('profile-name').textContent = profileData.profileName || "Unknown";
+        document.getElementById('profile-age').textContent = `Age: ${profileData.age || "N/A"}`;
+        document.getElementById('profile-profession').textContent = profileData.userType || "N/A";
+        document.getElementById('profile-about').textContent = profileData.description || "No description available.";
+        document.getElementById('profile-location').textContent = `Location: ${profileData.address || "Location not available"}`;
+        document.getElementById('profile-image').src = profileData.image || 'https://via.placeholder.com/250';
+  
+        const mapLink = document.getElementById('map-link');
+        if (profileData.address) {
+          mapLink.href = `https://www.google.com/maps/search/?q=${encodeURIComponent(profileData.address)}`;
+        } else {
+          mapLink.style.display = "none";
+        }
+  
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+        alert("Error fetching profile data.");
+      }
     }
+  
+    loadProfile();
   </script>
+  
 
 </body>
 </html>

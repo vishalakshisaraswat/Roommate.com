@@ -24,7 +24,7 @@ router.post('/submit-form', async (req, res) => {
         }
 
 
-        // Check if the userId exists in the Profile collection
+  
       
         // Normalize field names to match schema
         let formattedData = {

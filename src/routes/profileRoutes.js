@@ -76,7 +76,7 @@ router.get('/all', async (req, res) => {
         address: profile.address,
         description: profile.description,
         image: profile.image ? `data:image/png;base64,${profile.image.toString('base64')}` : null,
-        // Add more fields from `q` if needed
+
       };
     });
 

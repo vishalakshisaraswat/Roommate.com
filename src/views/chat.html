@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Chat</title>
-    <link rel="stylesheet" href="styles.css">
     <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="navbar">
@@ -13,63 +13,82 @@
         <div class="nav-links">
             <a href="responses.html">Profiles</a>
             <a href="roomdetails.html">Rooms</a>
-            <a href="chat.html">Chat</a>
+            <a id="inboxLink" href="received.html">Inbox</a>
             <a href="../iLanding/index.html">Log Out</a>
         </div>
     </div>
-    <h2>Private Chat</h2>
-    
-    <label>Enter Your Name:</label>
-    <input type="text" id="username">
-    <button onclick="joinChat()">Join</button>
 
-    <br><br>
-
-    <label>Chat with:</label>
-    <input type="text" id="receiver">
-    
+    <h2 id="receiverTitle">Private Chat</h2>
     <div id="chatBox"></div>
-
     <input type="text" id="messageInput" placeholder="Type a message">
     <button onclick="sendMessage()">Send</button>
 
     <script>
         const socket = io();
-        let username = '';
-    
-        socket.on('chatHistory', (messages) => {
-            messages.forEach(({ sender, message }) => {
-                displayMessage(sender, message);
-            });
-        });
-    
-        function displayMessage(sender, message) {
-            const chatBox = document.getElementById('chatBox'); // Corrected ID
-            const messageElement = document.createElement('p');
-            messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-            chatBox.appendChild(messageElement);
-        }
-    
-        function joinChat() {
-            username = document.getElementById('username').value;
-            socket.emit('join', username);
-        }
-    
-        function sendMessage() {
-            const message = document.getElementById('messageInput').value;
-            const receiver = document.getElementById('receiver').value;
-    
-            if (receiver && message) {
-                socket.emit('privateMessage', { sender: username, receiver, message });
-                displayMessage("You", message); // Display message immediately
-                document.getElementById('messageInput').value = '';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const senderId = urlParams.get('sender');
+        const receiverId = urlParams.get('receiver');
+        const userId = urlParams.get('userId'); // for Inbox link
+
+        const receiverTitle = document.getElementById('receiverTitle');
+
+        // ✅ Update Inbox link dynamically after DOM is loaded
+        window.onload = () => {
+            const inboxLink = document.getElementById('inboxLink');
+            if (inboxLink && userId) {
+                inboxLink.href = `received.html?userId=${userId}`;
+            }
+        };
+
+        // Fetch receiver name and update title
+        async function fetchReceiverName(userId) {
+            try {
+                const res = await fetch(`/profile/user/${userId}`);
+                const data = await res.json();
+                if (data.length > 0) {
+                    receiverTitle.textContent = `Chatting with: ${data[0].profileName}`;
+                } else {
+                    receiverTitle.textContent = "Chatting with: Unknown";
+                }
+            } catch (err) {
+                console.error("Error fetching receiver name:", err);
+                receiverTitle.textContent = "Chatting with: Unknown";
             }
         }
-    
-        socket.on('privateMessage', (data) => {
-            displayMessage(data.sender, data.message);
+
+        fetchReceiverName(receiverId);
+        socket.emit('join', senderId);
+
+        socket.on('chatHistory', (messages) => {
+            messages
+                .filter(m => (m.sender === senderId && m.receiver === receiverId) || (m.sender === receiverId && m.receiver === senderId))
+                .forEach(({ sender, message }) => {
+                    displayMessage(sender === senderId ? "You" : "Them", message);
+                });
         });
+
+        socket.on('privateMessage', ({ sender, message }) => {
+            if (sender === receiverId) {
+                displayMessage("Them", message);
+            }
+        });
+
+        function displayMessage(sender, message) {
+            const chatBox = document.getElementById('chatBox');
+            const msg = document.createElement('p');
+            msg.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatBox.appendChild(msg);
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value.trim();
+            if (!message) return;
+
+            socket.emit('privateMessage', { sender: senderId, receiver: receiverId, message });
+            displayMessage("You", message);
+            document.getElementById('messageInput').value = '';
+        }
     </script>
-    
 </body>
 </html>

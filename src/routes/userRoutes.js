@@ -34,7 +34,6 @@ router.post('/signup', async (req, res) => {
     });
 
     await newUser.save();
-    // res.sendFile(path.join(__dirname, '../views/success.html'));
     console.log(`"Signup successful:" , newUser.userId`);
     res.redirect(`/success.html?userId=${newUser.userId}`);
   } catch (err) {
@@ -63,36 +62,38 @@ router.post(['/login', '/login-signup'], async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid password' });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, 
+      { userId: user.userId, email: user.email },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Check if profile exists before deciding redirect
     const profile = await Profile.findOne({ userId: user.userId });
     const redirectUrl = profile ? "/responses.html" : "/profile.html";
 
-    res.json({ message: "Login successful", token, redirect: redirectUrl });
+    // Return userId in response
+    res.json({
+      message: "Login successful",
+      token,
+      userId: user.userId,
+      redirect: redirectUrl
+    });
 
   } catch (err) {
-    console.error("Login Error:", err); // Change this to log more details
-res.status(500).json({ message: 'Error during login', error: err.message });
-
+    console.error("Login Error:", err);
+    res.status(500).json({ message: 'Error during login', error: err.message });
   }
 });
+
 
 module.exports = router;

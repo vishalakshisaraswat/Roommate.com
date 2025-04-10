@@ -4,7 +4,7 @@ const roomSchema = new mongoose.Schema({
   roomId: { type: String, unique: true, required: true }, // Explicitly defined
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Profile', required: true },
 
-  // Describe Your Room (First in HTML)
+  // Describe Your Room 
   roomType: { type: String, enum: ["Single", "Double", "Suite"], required: true },
   washroomType: { type: String, enum: ["Private", "Shared"], required: true },
   furnishing: { type: String, enum: ["Fully Furnished", "Semi Furnished", "Unfurnished"], required: true },
@@ -16,7 +16,7 @@ const roomSchema = new mongoose.Schema({
   address: { type: String, required: true },
 
   // Rent (Dropdown)
-  rent: { type: String, required: true }, // Now storing as range (e.g., "1000-2000")
+  rent: { type: String, required: true }, 
 
   // Availability
   availability: { type: Date, required: true },
@@ -37,7 +37,7 @@ const roomSchema = new mongoose.Schema({
   },
 
   // Photos
-  photos: [{ type: String }], // Storing image file paths or Base64 strings
+  photos: [{ type: String }], 
 
 }, { timestamps: true });
 

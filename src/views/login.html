@@ -94,7 +94,8 @@
                 window.location.href = `profile.html?userId=${userId}`;
             } else {
                 // Profile exists → Redirect to homepage
-                window.location.href = 'responses.html';
+                window.location.href = `responses.html?userId=${userId}`; 
+
             }
         } catch (error) {
             console.error("Error checking profile:", error);
@@ -125,8 +126,8 @@
                 if (data.userId) localStorage.setItem("userId", data.userId);
                 if (data.token) localStorage.setItem("token", data.token);
 
-                console.log("Redirecting to profile check...");
-                checkUserProfile(data.userId); // Check if user has a profile
+
+                checkUserProfile(data.userId);
             }
         } catch (error) {
             alert("An error occurred. Please try again.");

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require('mongoose');
 const Roommate = require("../models/ques-withRoom.js");
-const Room = require("../models/room.js"); // ✅ Using room.js instead of profile.js
+const Room = require("../models/room.js"); 
 
 // Handle form submission
 router.post("/submit-form", async (req, res) => {
@@ -26,7 +26,7 @@ router.post("/submit-form", async (req, res) => {
         }
 
         let formattedData = {
-            userId, // ✅ Now using userId field
+            userId, 
             genderPreference: req.body["gender-preference"],
             ageGroup: req.body["age-group"],
             sleepingSchedule: req.body["sleeping-schedule"],

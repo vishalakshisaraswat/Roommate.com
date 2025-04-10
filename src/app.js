@@ -42,9 +42,9 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // Connect to database
 connectDB();
 
-const users = {}; // Store connected users (socket.id -> username)
+const users = {}; // Store connected users 
 
-const axios = require('axios'); // Ensure Axios is installed: npm install axios
+const axios = require('axios'); // Ensure Axios is installed
 
 
 // WebSocket connection

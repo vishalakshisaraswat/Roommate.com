@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inbox - Received Messages</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background-color: #333;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .nav-links a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 20px 0;
+      color: #333;
+    }
+
+    #messages {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .message-box {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .message-box h3 {
+      margin-top: 0;
+      color: #222;
+    }
+
+    .message-box p {
+      margin: 8px 0;
+      font-size: 14px;
+      color: #444;
+    }
+
+    .message-box a {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #007BFF;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .message-box a:hover {
+      background-color: #0056b3;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="logo">RoomMate</div>
+    <div class="nav-links">
+      <a id="profilesLink" href="responses.html">Profiles</a>
+      <a id="roomsLink" href="roomdetails.html">Rooms</a>
+      <a id="chatLink" href="chat.html">Chat</a>
+      <a id="inboxLink" href="received.html">Inbox</a>
+      <a href="../iLanding/index.html">Log Out</a>
+    </div>
+  </div>
+
+  <h2>Inbox - Received Messages</h2>
+  <div id="messages"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("userId");
+
+    window.onload = () => {
+      if (userId) {
+        document.getElementById("profilesLink").href = `responses.html?userId=${userId}`;
+        document.getElementById("roomsLink").href = `roomdetails.html?userId=${userId}`;
+        document.getElementById("chatLink").href = `chat.html?userId=${userId}`;
+        document.getElementById("inboxLink").href = `received.html?userId=${userId}`;
+      }
+    };
+
+    async function fetchMessages() {
+      try {
+        const res = await fetch(`/chat/received/${userId}`);
+        const messages = await res.json();
+
+        if (!messages.length) {
+          document.getElementById("messages").innerHTML = "<p style='text-align:center;'>No messages received yet.</p>";
+          return;
+        }
+
+        const grouped = {};
+        messages.forEach(msg => {
+          if (!grouped[msg.sender]) grouped[msg.sender] = [];
+          grouped[msg.sender].push(msg);
+        });
+
+        for (const senderId in grouped) {
+          const senderRes = await fetch(`/profile/user/${senderId}`);
+          const senderData = await senderRes.json();
+          const senderName = senderData.length > 0 ? senderData[0].profileName : senderId;
+
+          const div = document.createElement("div");
+          div.className = "message-box";
+          div.innerHTML = `
+            <h3>From: ${senderName}</h3>
+            ${grouped[senderId].map(m => `<p>${m.message}</p>`).join("")}
+            <a href="chat.html?sender=${userId}&receiver=${senderId}&userId=${userId}">Reply</a>
+          `;
+          document.getElementById("messages").appendChild(div);
+        }
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+        document.getElementById("messages").innerHTML = "<p style='text-align:center;'>Error loading messages.</p>";
+      }
+    }
+
+    fetchMessages();
+  </script>
+</body>
+</html>

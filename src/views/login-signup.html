@@ -90,7 +90,7 @@
     return urlParams.get(name);
 }
 
-// Extract userId from URL (if available) and store it
+// Extract userId from URL and store it
 const userId = getQueryParam("userId");
 if (userId) {
     localStorage.setItem("userId", userId);

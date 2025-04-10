@@ -83,9 +83,9 @@
   <div class="navbar">
     <div class="logo">RoomMate</div>
     <div class="nav-links">
-      <a href="responses.html">Profiles</a>
-      <a href="roomdetails.html">Rooms</a>
-      <a href="chat.html">Chat</a>
+      <a id="profilesLink" href="#">Profiles</a>
+      <a id="roomsLink" href="#">Rooms</a>
+      <a id="inboxLink" href="#">Inbox</a>
       <a href="../iLanding/index.html">Log Out</a>
     </div>
   </div>
@@ -108,105 +108,23 @@
 
   <div class="profiles-container" id="profiles"></div>
 
-  <!-- <script>
-    const profileContainer = document.getElementById('profiles');
-    let profiles = [];
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const userId = localStorage.getItem('userId');
-
-      try {
-        const [aiRes, allRes] = await Promise.all([
-          fetch(`/questionaire/ai-match/${userId}`),
-          fetch('/profile/all')
-        ]);
-
-        const matches = await aiRes.json();
-        const allProfiles = await allRes.json();
-
-        profiles = allProfiles.map(profile => {
-          const match = matches.find(m => m.userId === profile.userId);
-          return {
-            ...profile,
-            matchScore: match ? Math.round(match.matchPercentage) : 0
-          };
-        })
-        .filter(profile => profile.matchScore > 0);
-        // Sort by matchScore descending
-profiles.sort((a, b) => b.matchScore - a.matchScore);
-
-// Optional: limit to top N matches
-const topN = 20;
-profiles = profiles.slice(0, topN);
-
-
-        displayProfiles(profiles);
-      } catch (err) {
-        console.error("Error loading profiles:", err);
-      }
-    });
-
-
-    function displayProfiles(profileList) {
-  console.log("Displaying profiles:", profileList);
-  profileContainer.innerHTML = ''; // ✅ Corrected
-
-  profileList.forEach(profile => {
-    console.log("Profile Data:", profile);
-
-    const card = document.createElement('div');
-    card.classList.add('profile-card');
-
-    card.innerHTML = `
-      <img src="${profile.image || 'default.jpg'}" alt="Profile Image">
-      <div class="profile-content">
-        <h3>${profile.profileName} (${profile.age})</h3>
-        <p><strong>Gender:</strong> ${profile.gender}</p>
-        <p><strong>Location:</strong> ${profile.address}</p>
-        <p><strong>Match:</strong> ${profile.matchScore}%</p>
-        <button onclick="startChat('${profile.userId}')">Chat</button>
-      </div>
-    `;
-
-    profileContainer.appendChild(card);
-  });
-}
-
-
- 
-
-    function startChat(receiverId) {
-      const senderId = localStorage.getItem('userId');
-      if (!senderId || !receiverId) return alert("Missing user ID");
-      window.location.href = `/chat.html?sender=${senderId}&receiver=${receiverId}`;
-    }
-
-    function applyFilters() {
-      const minAge = document.getElementById('minAge').value;
-      const maxAge = document.getElementById('maxAge').value;
-      const gender = document.getElementById('genderFilter').value;
-      const location = document.getElementById('locationFilter').value.toLowerCase();
-
-      let filtered = profiles;
-
-      if (minAge) filtered = filtered.filter(p => p.age >= parseInt(minAge));
-      if (maxAge) filtered = filtered.filter(p => p.age <= parseInt(maxAge));
-      if (gender) filtered = filtered.filter(p => p.gender === gender);
-      if (location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
-
-      displayProfiles(filtered);
-    }
-  </script> -->
-
-
   <script>
     const profileContainer = document.getElementById('profiles');
     let profiles = [];
   
-    document.addEventListener('DOMContentLoaded', async () => {
-      const userId = localStorage.getItem('userId');
-      const formType = localStorage.getItem('formType');
+    const userId = localStorage.getItem('userId');
+    const formType = localStorage.getItem('formType');
   
+    // Update navbar links with userId
+    window.onload = () => {
+      if (userId) {
+        document.getElementById("profilesLink").href = `responses.html?userId=${userId}`;
+        document.getElementById("roomsLink").href = `roomdetails.html?userId=${userId}`;
+        document.getElementById("inboxLink").href = `received.html?userId=${userId}`;
+      }
+    };
+  
+    document.addEventListener('DOMContentLoaded', async () => {
       if (!userId || !formType) return alert("Missing user ID or form type");
   
       let matchEndpoint = '';
@@ -236,7 +154,7 @@ profiles = profiles.slice(0, topN);
         }).filter(profile => profile.matchScore > 0);
   
         profiles.sort((a, b) => b.matchScore - a.matchScore);
-        profiles = profiles.slice(0, 20); // Optional top N
+        profiles = profiles.slice(0, 20);
   
         displayProfiles(profiles);
       } catch (err) {
@@ -252,6 +170,11 @@ profiles = profiles.slice(0, topN);
         const card = document.createElement('div');
         card.classList.add('profile-card');
   
+        // Navigate to profile-details.html on card click
+        card.addEventListener('click', () => {
+          window.location.href = `profile-details.html?userId=${profile.userId}`;
+        });
+  
         card.innerHTML = `
           <img src="${profile.image || 'default.jpg'}" alt="Profile Image">
           <div class="profile-content">
@@ -259,7 +182,7 @@ profiles = profiles.slice(0, topN);
             <p><strong>Gender:</strong> ${profile.gender}</p>
             <p><strong>Location:</strong> ${profile.address}</p>
             <p><strong>Match:</strong> ${profile.matchScore}%</p>
-            <button onclick="startChat('${profile.userId}')">Chat</button>
+            <button onclick="event.stopPropagation(); startChat('${profile.userId}')">Chat</button>
           </div>
         `;
   
@@ -268,9 +191,9 @@ profiles = profiles.slice(0, topN);
     }
   
     function startChat(receiverId) {
-      const senderId = localStorage.getItem('userId');
+      const senderId = userId;
       if (!senderId || !receiverId) return alert("Missing user ID");
-      window.location.href = `/chat.html?sender=${senderId}&receiver=${receiverId}`;
+      window.location.href = `chat.html?sender=${senderId}&receiver=${receiverId}&userId=${senderId}`;
     }
   
     function applyFilters() {
@@ -290,5 +213,6 @@ profiles = profiles.slice(0, topN);
     }
   </script>
   
+
 </body>
 </html>

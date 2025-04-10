@@ -18,9 +18,11 @@ const RoommateSchema = new mongoose.Schema({
     dietaryPreference: { type: String, enum: ['vegetarian', 'non-vegetarian', 'vegan'], required: true },
     pets: { type: String, enum: ['own-and-comfortable', 'comfortable-no-pets', 'not-comfortable', 'no-preference'], required: true },
     additionalPreferences: { type: String },
-}, { timestamps: true });
+}, { timestamps: true,
+    collection: 'questionnaires'
+});
 
 
-const Roommate = mongoose.model('Roommate', RoommateSchema);
+const Roommate =mongoose.models.Questionnaire || mongoose.model('Questionnaire', RoommateSchema, 'questionnaires');
 
 module.exports = Roommate;

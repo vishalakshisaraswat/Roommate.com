@@ -183,18 +183,6 @@
             reader.onloadend = async function() {
               formData.set('image', reader.result.split(',')[1]); // Send only Base64 data, no prefix
     
-              // const data = {};
-              // formData.forEach((value, key) => {
-              //   if (data[key]) {
-              //     if (Array.isArray(data[key])) {
-              //       data[key].push(value);
-              //     } else {
-              //       data[key] = [data[key], value];
-              //     }
-              //   } else {
-              //     data[key] = value;
-              //   }
-              // });
 
                // Convert FormData to JSON
             const data = {};
